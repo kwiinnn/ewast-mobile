@@ -1,7 +1,17 @@
+import BackIcon from "../../assets/icons/back.svg";
+import ErrorIcon from "../../assets/icons/error.svg";
+import EyeCloseIcon from "../../assets/icons/eye-close.svg";
+import EyeOpenIcon from "../../assets/icons/eye-open.svg";
+import LockIcon from "../../assets/icons/lock.svg";
+import MailIcon from "../../assets/icons/mail.svg";
+import Logo from "../../assets/logo.svg";
+
+import { router } from "expo-router";
 import { useState } from "react";
 import {
     KeyboardAvoidingView,
     Platform,
+    SafeAreaView,
     ScrollView,
     StatusBar,
     Text,
@@ -9,19 +19,6 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-// Custom local SVGs work perfectly when using Image from expo-image
-import { Image } from "expo-image";
-
-// ---------------------------------------------------------------------------
-// Asset imports
-// ---------------------------------------------------------------------------
-const LOGO_URI = require("@/assets/logo.svg");
-const BACK_URI = require("@/assets/icons/back.svg");
-const MAIL_URI = require("@/assets/icons/mail.svg");
-const LOCK_URI = require("@/assets/icons/lock.svg");
-const EYE_OPEN_URI = require("@/assets/icons/eye-open.svg");
-const EYE_CLOSE_URI = require("@/assets/icons/eye-close.svg");
-const ERROR_URI = require("@/assets/icons/error.svg");
 
 // ---------------------------------------------------------------------------
 // Design tokens
@@ -35,26 +32,6 @@ const COLOR = {
     errorBg: "#FFEBEE",
     errorText: "#E53935",
 };
-
-// ---------------------------------------------------------------------------
-// Crash-proof Icon Wrapper using expo-image
-// ---------------------------------------------------------------------------
-interface SvgIconProps {
-    source: any;
-    size?: number;
-    color?: string;
-}
-
-function SvgIcon({ source, size = 20, color }: SvgIconProps) {
-    // expo-image resolves the require() automatically and handles SVG tinting natively
-    return (
-        <Image
-            source={source}
-            style={{ width: size, height: size }}
-            tintColor={color}
-        />
-    );
-}
 
 // ---------------------------------------------------------------------------
 // Props
@@ -71,7 +48,7 @@ interface LoginScreenProps {
 export default function LoginScreen({
     onLogin,
     onBack,
-    onSignup,
+    onSignup = () => router.push("/signup"),
 }: LoginScreenProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -99,89 +76,92 @@ export default function LoginScreen({
         <View className="flex-1" style={{ backgroundColor: COLOR.background }}>
             <StatusBar barStyle="dark-content" backgroundColor={COLOR.background} />
 
-            {/* ── Header ───────────────────────────────────────────────────── */}
-            <View
-                className="flex-row items-center px-4 pt-12 pb-4"
-                style={{ backgroundColor: COLOR.background }}
-            >
-                <TouchableOpacity
-                    onPress={onBack}
-                    className="w-10 h-10 rounded-lg items-center justify-center mr-3"
-                    style={{ backgroundColor: COLOR.green }}
-                    accessibilityLabel="Go back"
+            {/* FIX #1: Wrapped Header in SafeAreaView */}
+            <SafeAreaView style={{ backgroundColor: COLOR.background }}>
+                {/* ── Header ───────────────────────────────────────────────────── */}
+                <View
+                    className="flex-row items-center px-4 pt-4 pb-4"
+                    style={{ backgroundColor: COLOR.background }}
                 >
-                    <SvgIcon source={BACK_URI} size={18} color={COLOR.white} />
-                </TouchableOpacity>
+                    {/* FIX #3: Use optional chaining via arrow function */}
+                    <TouchableOpacity
+                        onPress={() => onBack?.()}
+                        className="w-10 h-10 rounded-lg items-center justify-center mr-3"
+                        style={{ backgroundColor: COLOR.green }}
+                        accessibilityLabel="Go back"
+                    >
+                        {/* FIX #1 & #2: Use SVG component directly, no expo-image or tintColor */}
+                        <BackIcon width={30} height={30} color={COLOR.white} fill={COLOR.white} />
+                    </TouchableOpacity>
 
-                <Text
-                    className="text-xl tracking-widest"
-                    style={{
-                        color: COLOR.dark,
-                        fontFamily: "StackSans-Headline",
-                        letterSpacing: 2,
-                    }}
-                >
-                    LOG-IN
-                </Text>
-            </View>
+                    <Text
+                        className="text-xl tracking-widest"
+                        style={{
+                            color: COLOR.dark,
+                            fontFamily: "StackSans-Headline",
+                            letterSpacing: 2,
+                        }}
+                    >
+                        LOG-IN
+                    </Text>
+                </View>
+            </SafeAreaView>
 
+            {/* FIX #4: Use undefined instead of "height" on Android */}
             <KeyboardAvoidingView
                 className="flex-1"
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
             >
                 <ScrollView
                     contentContainerStyle={{ flexGrow: 1 }}
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
-                    <View className="flex-1 px-5 py-4">
+                    <View className="flex-1 px-5 py-2">
 
                         {/* ── Error banner ─────────────────────────────────────────── */}
-                        {error && (
-                            <View
-                                className="flex-row items-center rounded-xl px-4 py-3 mb-5"
-                                style={{ backgroundColor: COLOR.errorBg }}
+                        <View
+                            className="flex-row items-center rounded-xl px-4 py-3 mb-5"
+                            style={{ 
+                                backgroundColor: COLOR.errorBg,
+                                opacity: error ? 1 : 0 // Retains layout space when hidden
+                            }}
+                            pointerEvents={error ? "auto" : "none"} // Prevents interaction when invisible
+                        >
+                            <ErrorIcon width={18} height={18} color={COLOR.errorText} />
+                            <Text
+                                className="ml-2 text-sm flex-1"
+                                style={{
+                                    color: COLOR.errorText,
+                                    fontFamily: "StackSans-Text",
+                                }}
                             >
-                                <SvgIcon source={ERROR_URI} size={18} color={COLOR.errorText} />
-                                <Text
-                                    className="ml-2 text-sm flex-1"
-                                    style={{
-                                        color: COLOR.errorText,
-                                        fontFamily: "StackSans-Text",
-                                    }}
-                                >
-                                    Error! {error}
-                                </Text>
-                            </View>
-                        )}
+                                {error || " "} 
+                            </Text>
+                        </View>
 
                         {/* ── Card ─────────────────────────────────────────────────── */}
                         <View
-                            className="rounded-2xl px-6 pt-10 pb-8"
+                            className="bg-white rounded-[32px] px-6 pt-10 pb-10 shadow-sm mt-6"
                             style={{
-                                backgroundColor: COLOR.white,
-                                shadowColor: "#000",
-                                shadowOffset: { width: 0, height: 2 },
-                                shadowOpacity: 0.06,
-                                shadowRadius: 12,
-                                elevation: 3,
+                                elevation: 2,
                             }}
                         >
-                            {/* Logo */}
-                            <View className="items-center mb-8">
-                                <SvgIcon source={LOGO_URI} size={100} />
+                            {/* Logo — SVG component directly */}
+                            <View className="items-center mb-3">
+                                <Logo width={200} height={75} />
                             </View>
 
                             {/* Email field */}
                             <View
-                                className="flex-row items-center rounded-full px-4 mb-4"
+                                className="flex-row items-center border-[1.5px] border-[#233329] rounded-full px-5 h-[52px] mb-8 bg-[#F0F4F1]"
                                 style={{
                                     borderWidth: 1.5,
                                     borderColor: COLOR.dark,
                                     height: 52,
                                 }}
                             >
-                                <SvgIcon source={MAIL_URI} size={18} color={COLOR.placeholder} />
+                                <MailIcon width={18} height={18} color={COLOR.placeholder} fill={COLOR.placeholder} stroke={COLOR.placeholder}/>
                                 <TextInput
                                     className="flex-1 ml-3 text-sm"
                                     style={{
@@ -204,14 +184,14 @@ export default function LoginScreen({
 
                             {/* Password field */}
                             <View
-                                className="flex-row items-center rounded-full px-4 mb-6"
+                                className="flex-row items-center border-[1.5px] border-[#233329] rounded-full px-5 h-[52px] mb-8 bg-[#F0F4F1]"
                                 style={{
                                     borderWidth: 1.5,
                                     borderColor: COLOR.dark,
                                     height: 52,
                                 }}
                             >
-                                <SvgIcon source={LOCK_URI} size={18} color={COLOR.placeholder} />
+                                <LockIcon width={18} height={18} color={COLOR.placeholder} fill={COLOR.placeholder}/>
                                 <TextInput
                                     className="flex-1 ml-3 text-sm"
                                     style={{
@@ -235,11 +215,10 @@ export default function LoginScreen({
                                         showPassword ? "Hide password" : "Show password"
                                     }
                                 >
-                                    <SvgIcon
-                                        source={showPassword ? EYE_OPEN_URI : EYE_CLOSE_URI}
-                                        size={20}
-                                        color={COLOR.placeholder}
-                                    />
+                                    {showPassword
+                                        ? <EyeOpenIcon width={20} height={20} color={COLOR.placeholder} fill={COLOR.placeholder}/>
+                                        : <EyeCloseIcon width={20} height={20} color={COLOR.placeholder} fill={COLOR.placeholder}/>
+                                    }
                                 </TouchableOpacity>
                             </View>
 
@@ -278,7 +257,7 @@ export default function LoginScreen({
                                 >
                                     Need an account?{" "}
                                 </Text>
-                                <TouchableOpacity onPress={onSignup}>
+                                <TouchableOpacity onPress={() => { alert("signup clicked"); router.push("/signup"); }}>
                                     <Text
                                         className="text-sm"
                                         style={{
