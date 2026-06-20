@@ -40,8 +40,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           label = isLoggedIn ? 'Profile' : 'Login';
         }
 
-        const isHome = route.name === 'index';
-        const color = isFocused && !isHome ? '#16A637' : (isFocused && isHome ? '#FFFFFF' : '#8F9BB3');
+        const color = isFocused ? '#FFFFFF' : '#8F9BB3';
         
         return (
           <TouchableOpacity
@@ -49,8 +48,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
             accessibilityRole="button"
             accessibilityState={isFocused ? { selected: true } : {}}
             onPress={onPress}
-            className={`items-center justify-center ${isFocused && isHome ? 'bg-[#16A637] w-[72px] h-[72px] rounded-full -mt-10 shadow-md' : 'w-[72px] h-[72px]'}`}
-            style={isFocused && isHome ? { elevation: 4 } : {}}
+            className={`items-center justify-center ${isFocused ? 'bg-[#16A637] w-[64px] h-[64px] rounded-full' : 'w-[64px] h-[64px]'}`}
           >
             {route.name === 'index' && <Home size={24} color={color} />}
             {route.name === 'report' && <PlusSquare size={24} color={color} />}

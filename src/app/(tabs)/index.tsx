@@ -11,7 +11,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   
   return (
-    <View className="flex-1 bg-[#F5F7F5]" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-[#F0F4F1]" style={{ paddingTop: insets.top }}>
       {/* Header */}
       <View className="flex-row justify-between items-center px-6 py-4 mt-2">
         <View className="flex-row items-center">
@@ -21,7 +21,7 @@ export default function HomeScreen() {
         {isLoggedIn && (
           <TouchableOpacity className="relative mr-2">
              <Bell size={26} color="#233329" />
-             <View className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[#F5F7F5]" />
+             <View className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[#F0F4F1]" />
           </TouchableOpacity>
         )}
       </View>
@@ -42,7 +42,7 @@ export default function HomeScreen() {
           </Text>
           
           {/* Search Input */}
-          <View className="flex-row items-center border-[1.5px] border-[#233329] rounded-full px-5 h-[52px] mb-8 bg-[#F5F7F5]">
+          <View className="flex-row items-center border-[1.5px] border-[#233329] rounded-full px-5 h-[52px] mb-8 bg-[#F0F4F1]">
              <TextInput 
                className="flex-1 text-[#233329] font-medium text-base"
                placeholder="Search Location"

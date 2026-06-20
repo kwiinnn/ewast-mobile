@@ -30,7 +30,7 @@ const ERROR_URI = require("@/assets/icons/error.svg");
 // Design tokens
 // ---------------------------------------------------------------------------
 const COLOR = {
-    background: "#F5F7F5",
+    background: "#F0F4F1",
     dark: "#233329",
     white: "#FFFFFF",
     green: "#16A637",
