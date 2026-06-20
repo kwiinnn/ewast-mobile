@@ -257,7 +257,7 @@ export default function LoginScreen({
                                 >
                                     Need an account?{" "}
                                 </Text>
-                                <TouchableOpacity onPress={() => { alert("signup clicked"); router.push("/signup"); }}>
+                                <TouchableOpacity onPress={onSignup}>
                                     <Text
                                         className="text-sm"
                                         style={{
