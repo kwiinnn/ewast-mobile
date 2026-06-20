@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+    Image,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
@@ -9,12 +10,14 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-// Custom local SVGs work perfectly when using Image from expo-image
-import { Image } from "expo-image";
+import { SvgUri } from "react-native-svg";
 
 // ---------------------------------------------------------------------------
-// Asset imports
+// Asset imports – adjust paths if your bundler resolves them differently
 // ---------------------------------------------------------------------------
+// SVG assets are imported as URI strings so SvgUri can render them.
+// If you use a transformer like react-native-svg-transformer, swap these for
+// direct `import Logo from "@/assets/logo.svg"` component imports instead.
 const LOGO_URI = require("@/assets/logo.svg");
 const BACK_URI = require("@/assets/icons/back.svg");
 const MAIL_URI = require("@/assets/icons/mail.svg");
@@ -37,7 +40,7 @@ const COLOR = {
 };
 
 // ---------------------------------------------------------------------------
-// Crash-proof Icon Wrapper using expo-image
+// Tiny SVG wrapper (works with both require() and URI strings)
 // ---------------------------------------------------------------------------
 interface SvgIconProps {
     source: any;
@@ -46,22 +49,25 @@ interface SvgIconProps {
 }
 
 function SvgIcon({ source, size = 20, color }: SvgIconProps) {
-    // expo-image resolves the require() automatically and handles SVG tinting natively
-    return (
-        <Image
-            source={source}
-            style={{ width: size, height: size }}
-            tintColor={color}
-        />
-    );
+    // resolve the asset URI from require()
+    const uri =
+        typeof source === "string"
+            ? source
+            : Image.resolveAssetSource(source)?.uri;
+
+    if (!uri) return null;
+    return <SvgUri width={size} height={size} uri={uri} color={color} />;
 }
 
 // ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
 interface LoginScreenProps {
+    /** Called when the user taps Login. Return a rejected Promise or throw to show an error. */
     onLogin?: (email: string, password: string) => Promise<void> | void;
+    /** Called when user taps the back arrow */
     onBack?: () => void;
+    /** Called when user taps Signup */
     onSignup?: () => void;
 }
 
