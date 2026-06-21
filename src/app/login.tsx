@@ -139,7 +139,7 @@ export default function LoginScreen({
                         >
                             {/* Logo */}
                             <View className="items-center mb-3 overflow-visible">
-                                <Logo height={65} className="mb-3" style={{ overflow: "visible" }}  />
+                                <Logo height={80} className="mb-3" style={{ overflow: "visible" }}  />
                             </View>
 
                             {/* Email field */}
