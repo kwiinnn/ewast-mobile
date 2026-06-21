@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { TextInput, TouchableOpacity, View, Text } from 'react-native';
-import { SvgProps } from 'react-native-svg';
 import EyeCloseIcon from '@/assets/icons/eye-close.svg';
 import EyeOpenIcon from '@/assets/icons/eye-open.svg';
 import { AuthColors } from '@/constants/auth-colors';
+import React, { useState } from 'react';
+import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SvgProps } from 'react-native-svg';
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 
@@ -71,7 +71,7 @@ export function AuthInput({
                     backgroundColor: AuthColors.field,
                 }}
             >
-                <Icon width={18} height={18} color={AuthColors.placeholder} fill={AuthColors.placeholder} />
+                <Icon width={18} height={18} color={AuthColors.placeholder} fill={AuthColors.placeholder} stroke={AuthColors.placeholder}/>
                 <TextInput
                     className="border-none outline-none"
                     style={{
@@ -99,9 +99,9 @@ export function AuthInput({
                         accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
                     >
                         {showPassword ? (
-                            <EyeOpenIcon width={20} height={20} color={AuthColors.placeholder} fill={AuthColors.placeholder} />
+                            <EyeOpenIcon width={20} height={20} color={AuthColors.placeholder} fill={AuthColors.placeholder} stroke={AuthColors.placeholder}/>
                         ) : (
-                            <EyeCloseIcon width={20} height={20} color={AuthColors.placeholder} fill={AuthColors.placeholder} />
+                            <EyeCloseIcon width={20} height={20} color={AuthColors.placeholder} fill={AuthColors.placeholder} stroke={AuthColors.placeholder}/>
                         )}
                     </TouchableOpacity>
                 )}
