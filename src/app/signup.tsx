@@ -12,8 +12,10 @@ import {
 } from 'react-native';
 import { SvgProps } from 'react-native-svg';
 
+// Imported Components
+
 // SVG Icon imports — adjust paths to match your project structure
-import BackIcon from '../../assets/icons/back.svg';
+import BackIcon from "../../assets/icons/back.svg";
 import CheckIcon from '../../assets/icons/check.svg';
 import EyeCloseIcon from '../../assets/icons/eye-close.svg';
 import EyeOpenIcon from '../../assets/icons/eye-open.svg';
@@ -29,11 +31,13 @@ const C = {
     card: '#FFFFFF',
     green: '#16A637',
     greenLight: '#E8F5EC',
-    placeholder: '#C7CBD2',
+    placeholder: '#8F9BB3',
     error: '#E53935',
     border: '#233329',
     stepLine: '#16A637',
-    stepInactive: '#C7CBD2',
+    stepInactive: '#8F9BB3',
+    field: '#F0F4F1',
+    white: "#FFFFFF"
 };
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -194,11 +198,12 @@ function InputField({
                     borderRadius: 50,
                     paddingHorizontal: 16,
                     paddingVertical: Platform.OS === 'ios' ? 14 : 10,
-                    backgroundColor: C.card,
+                    backgroundColor: C.field,
                 }}
             >
                 <LeftIcon width={18} height={18} color={C.placeholder} style={{ marginRight: 10 }} />
                 <TextInput
+                    className = "border-none outline-none"
                     style={{
                         flex: 1,
                         fontFamily: 'StackSansText',
@@ -498,20 +503,18 @@ export default function SignupScreen() {
                             gap: 14,
                         }}
                     >
+                        {/*DO NOT USE BACK BUTTON COMPONENT HERE SINCE ITS UNIQUE */}
                         <TouchableOpacity
-                            onPress={goBack}
-                            style={{
-                                width: 40,
-                                height: 40,
-                                borderRadius: 10,
-                                backgroundColor: C.green,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}
-                            activeOpacity={0.8}
+                            onPress={() => router.push("/")}
+                            className="w-10 h-10 rounded-lg items-center justify-center"
+                            style={{ backgroundColor: C.green }}
+                            accessibilityLabel="Go back"
                         >
-                            <BackIcon width={20} height={20} color="#fff" />
+                            {/* FIX #1 & #2: Use SVG component directly, no expo-image or tintColor */}
+                            <BackIcon width={30} height={30} color={C.white} fill={C.white} />
                         </TouchableOpacity>
+
+
                         <Text
                             style={{
                                 fontFamily: 'StackSansHeadline',

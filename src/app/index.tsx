@@ -1,11 +1,3 @@
-import BackIcon from "../../assets/icons/back.svg";
-import ErrorIcon from "../../assets/icons/error.svg";
-import EyeCloseIcon from "../../assets/icons/eye-close.svg";
-import EyeOpenIcon from "../../assets/icons/eye-open.svg";
-import LockIcon from "../../assets/icons/lock.svg";
-import MailIcon from "../../assets/icons/mail.svg";
-import Logo from "../../assets/logo.svg";
-
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -19,6 +11,16 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import ErrorIcon from "../../assets/icons/error.svg";
+import EyeCloseIcon from "../../assets/icons/eye-close.svg";
+import EyeOpenIcon from "../../assets/icons/eye-open.svg";
+import LockIcon from "../../assets/icons/lock.svg";
+import MailIcon from "../../assets/icons/mail.svg";
+
+// Imported Components
+
+import { BackButton } from '../components/backbutton';
+import Logo from '../components/logo';
 
 // ---------------------------------------------------------------------------
 // Design tokens
@@ -28,7 +30,7 @@ const COLOR = {
     dark: "#233329",
     white: "#FFFFFF",
     green: "#16A637",
-    placeholder: "#C7CBD2",
+    placeholder: "#8F9BB3",
     errorBg: "#FFEBEE",
     errorText: "#E53935",
 };
@@ -55,7 +57,6 @@ export default function LoginScreen({
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-
     async function handleLogin() {
         if (!email.trim() || !password) {
             setError("Invalid Username or Password");
@@ -82,15 +83,7 @@ export default function LoginScreen({
                 className="flex-row items-center px-4 pt-4 pb-4"
                 style={{ backgroundColor: COLOR.background }}
             >
-                <TouchableOpacity
-                    onPress={() => onBack?.()}
-                    className="w-10 h-10 rounded-lg items-center justify-center mr-3"
-                    style={{ backgroundColor: COLOR.green }}
-                    accessibilityLabel="Go back"
-                >
-                    <BackIcon width={30} height={30} color={COLOR.white} fill={COLOR.white} />
-                </TouchableOpacity>
-
+                <BackButton onBack={() => router.back()} />
                 <Text
                     className="text-xl tracking-widest"
                     style={{
@@ -111,6 +104,7 @@ export default function LoginScreen({
                     contentContainerStyle={{ flexGrow: 1 }}
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
+                    removeClippedSubviews={false}
                 >
                     {/* FIX 2: Removed "flex-1" here. It was fighting with ScrollView and causing your layout ruin. */}
                     <View className="px-5 py-2 pb-10">
@@ -118,9 +112,9 @@ export default function LoginScreen({
                         {/* ── Error banner ─────────────────────────────────────────── */}
                         <View
                             className="flex-row items-center rounded-xl px-4 py-3 mb-5"
-                            style={{ 
+                            style={{
                                 backgroundColor: COLOR.errorBg,
-                                opacity: error ? 1 : 0 
+                                opacity: error ? 1 : 0
                             }}
                             pointerEvents={error ? "auto" : "none"}
                         >
@@ -132,7 +126,7 @@ export default function LoginScreen({
                                     fontFamily: "StackSans-Text",
                                 }}
                             >
-                                {error || " "} 
+                                {error || " "}
                             </Text>
                         </View>
 
@@ -144,8 +138,8 @@ export default function LoginScreen({
                             }}
                         >
                             {/* Logo */}
-                            <View className="items-center mb-3">
-                                <Logo width={200} height={75} />
+                            <View className="items-center mb-3 overflow-visible">
+                                <Logo height={65} className="mb-3" style={{ overflow: "visible" }}  />
                             </View>
 
                             {/* Email field */}
@@ -158,9 +152,9 @@ export default function LoginScreen({
                                     marginBottom: 32,
                                 }}
                             >
-                                <MailIcon width={18} height={18} color={COLOR.placeholder} fill={COLOR.placeholder} stroke={COLOR.placeholder}/>
+                                <MailIcon width={18} height={18} color={COLOR.placeholder} fill={COLOR.placeholder} stroke={COLOR.placeholder} />
                                 <TextInput
-                                    className="flex-1 ml-3 text-sm"
+                                    className="flex-1 ml-3 text-sm border-none outline-none"
                                     style={{
                                         color: COLOR.dark,
                                         fontFamily: "StackSans-Text",
@@ -189,9 +183,9 @@ export default function LoginScreen({
                                     marginBottom: 32,
                                 }}
                             >
-                                <LockIcon width={18} height={18} color={COLOR.placeholder} fill={COLOR.placeholder}/>
+                                <LockIcon width={18} height={18} color={COLOR.placeholder} fill={COLOR.placeholder} />
                                 <TextInput
-                                    className="flex-1 ml-3 text-sm"
+                                    className="flex-1 ml-3 text-sm border-none outline-none"
                                     style={{
                                         color: COLOR.dark,
                                         fontFamily: "StackSans-Text",
@@ -214,8 +208,8 @@ export default function LoginScreen({
                                     }
                                 >
                                     {showPassword
-                                        ? <EyeOpenIcon width={20} height={20} color={COLOR.placeholder} fill={COLOR.placeholder}/>
-                                        : <EyeCloseIcon width={20} height={20} color={COLOR.placeholder} fill={COLOR.placeholder}/>
+                                        ? <EyeOpenIcon width={20} height={20} color={COLOR.placeholder} fill={COLOR.placeholder} />
+                                        : <EyeCloseIcon width={20} height={20} color={COLOR.placeholder} fill={COLOR.placeholder} />
                                     }
                                 </TouchableOpacity>
                             </View>
