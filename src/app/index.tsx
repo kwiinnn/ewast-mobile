@@ -73,41 +73,36 @@ export default function LoginScreen({
     }
 
     return (
-        <View className="flex-1" style={{ backgroundColor: COLOR.background }}>
+        // FIX 1: Root is now SafeAreaView to safely handle top/bottom safe areas across all devices
+        <SafeAreaView className="flex-1" style={{ backgroundColor: COLOR.background }}>
             <StatusBar barStyle="dark-content" backgroundColor={COLOR.background} />
 
-            {/* FIX #1: Wrapped Header in SafeAreaView */}
-            <SafeAreaView style={{ backgroundColor: COLOR.background }}>
-                {/* ── Header ───────────────────────────────────────────────────── */}
-                <View
-                    className="flex-row items-center px-4 pt-4 pb-4"
-                    style={{ backgroundColor: COLOR.background }}
+            {/* ── Header ───────────────────────────────────────────────────── */}
+            <View
+                className="flex-row items-center px-4 pt-4 pb-4"
+                style={{ backgroundColor: COLOR.background }}
+            >
+                <TouchableOpacity
+                    onPress={() => onBack?.()}
+                    className="w-10 h-10 rounded-lg items-center justify-center mr-3"
+                    style={{ backgroundColor: COLOR.green }}
+                    accessibilityLabel="Go back"
                 >
-                    {/* FIX #3: Use optional chaining via arrow function */}
-                    <TouchableOpacity
-                        onPress={() => onBack?.()}
-                        className="w-10 h-10 rounded-lg items-center justify-center mr-3"
-                        style={{ backgroundColor: COLOR.green }}
-                        accessibilityLabel="Go back"
-                    >
-                        {/* FIX #1 & #2: Use SVG component directly, no expo-image or tintColor */}
-                        <BackIcon width={30} height={30} color={COLOR.white} fill={COLOR.white} />
-                    </TouchableOpacity>
+                    <BackIcon width={30} height={30} color={COLOR.white} fill={COLOR.white} />
+                </TouchableOpacity>
 
-                    <Text
-                        className="text-xl tracking-widest"
-                        style={{
-                            color: COLOR.dark,
-                            fontFamily: "StackSans-Headline",
-                            letterSpacing: 2,
-                        }}
-                    >
-                        LOG-IN
-                    </Text>
-                </View>
-            </SafeAreaView>
+                <Text
+                    className="text-xl tracking-widest"
+                    style={{
+                        color: COLOR.dark,
+                        fontFamily: "StackSans-Headline",
+                        letterSpacing: 2,
+                    }}
+                >
+                    LOG-IN
+                </Text>
+            </View>
 
-            {/* FIX #4: Use undefined instead of "height" on Android */}
             <KeyboardAvoidingView
                 className="flex-1"
                 behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -117,16 +112,17 @@ export default function LoginScreen({
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
-                    <View className="flex-1 px-5 py-2">
+                    {/* FIX 2: Removed "flex-1" here. It was fighting with ScrollView and causing your layout ruin. */}
+                    <View className="px-5 py-2 pb-10">
 
                         {/* ── Error banner ─────────────────────────────────────────── */}
                         <View
                             className="flex-row items-center rounded-xl px-4 py-3 mb-5"
                             style={{ 
                                 backgroundColor: COLOR.errorBg,
-                                opacity: error ? 1 : 0 // Retains layout space when hidden
+                                opacity: error ? 1 : 0 
                             }}
-                            pointerEvents={error ? "auto" : "none"} // Prevents interaction when invisible
+                            pointerEvents={error ? "auto" : "none"}
                         >
                             <ErrorIcon width={18} height={18} color={COLOR.errorText} />
                             <Text
@@ -142,23 +138,24 @@ export default function LoginScreen({
 
                         {/* ── Card ─────────────────────────────────────────────────── */}
                         <View
-                            className="bg-white rounded-[32px] px-6 pt-10 pb-10 shadow-sm mt-6"
+                            className="bg-white rounded-[32px] px-6 pt-10 pb-10 shadow-sm mt-2"
                             style={{
                                 elevation: 2,
                             }}
                         >
-                            {/* Logo — SVG component directly */}
+                            {/* Logo */}
                             <View className="items-center mb-3">
                                 <Logo width={200} height={75} />
                             </View>
 
                             {/* Email field */}
                             <View
-                                className="flex-row items-center border-[1.5px] border-[#233329] rounded-full px-5 h-[52px] mb-8 bg-[#F0F4F1]"
+                                className="flex-row items-center rounded-full px-5 bg-[#F0F4F1]"
                                 style={{
                                     borderWidth: 1.5,
                                     borderColor: COLOR.dark,
                                     height: 52,
+                                    marginBottom: 32,
                                 }}
                             >
                                 <MailIcon width={18} height={18} color={COLOR.placeholder} fill={COLOR.placeholder} stroke={COLOR.placeholder}/>
@@ -184,11 +181,12 @@ export default function LoginScreen({
 
                             {/* Password field */}
                             <View
-                                className="flex-row items-center border-[1.5px] border-[#233329] rounded-full px-5 h-[52px] mb-8 bg-[#F0F4F1]"
+                                className="flex-row items-center rounded-full px-5 bg-[#F0F4F1]"
                                 style={{
                                     borderWidth: 1.5,
                                     borderColor: COLOR.dark,
                                     height: 52,
+                                    marginBottom: 32,
                                 }}
                             >
                                 <LockIcon width={18} height={18} color={COLOR.placeholder} fill={COLOR.placeholder}/>
@@ -274,6 +272,6 @@ export default function LoginScreen({
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
-        </View>
+        </SafeAreaView>
     );
 }
