@@ -1,19 +1,47 @@
 import React, { createContext, useContext, useState } from 'react';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+export type User = {
+  fullName: string;
+  email: string;
+};
+
 type AuthContextType = {
   isLoggedIn: boolean;
-  toggleAuth: () => void;
+  user: User | null;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (data: { fullName: string; email: string; password: string }) => Promise<void>;
+  logout: () => void;
 };
+
+// ─── Context ─────────────────────────────────────────────────────────────────
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
 
-  const toggleAuth = () => setIsLoggedIn((prev) => !prev);
+  const login = async (email: string, password: string) => {
+    // TODO: Replace with actual API call
+    // Simulates network delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    setUser({ fullName: 'User', email });
+  };
+
+  const signup = async (data: { fullName: string; email: string; password: string }) => {
+    // TODO: Replace with actual API call
+    // Simulates network delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    setUser({ fullName: data.fullName, email: data.email });
+  };
+
+  const logout = () => {
+    setUser(null);
+  };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, toggleAuth }}>
+    <AuthContext.Provider value={{ isLoggedIn: !!user, user, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );
