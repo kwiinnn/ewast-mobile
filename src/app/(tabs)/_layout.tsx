@@ -1,12 +1,14 @@
-import { Tabs } from 'expo-router';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { Home, PlusSquare, Map, User, UserPlus } from 'lucide-react-native';
 import { useAuth } from '@/components/AuthContext';
+import { Tabs } from 'expo-router';
+import { Home, Map, PlusSquare, User, UserPlus } from 'lucide-react-native';
+import { Platform, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function CustomTabBar({ state, descriptors, navigation }: any) {
   const { isLoggedIn } = useAuth();
   const insets = useSafeAreaInsets();
+
+  if (Platform.OS === 'web') return null;
   
   return (
     <View 
