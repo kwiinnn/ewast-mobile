@@ -2,3 +2,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Force Expo web root containers to fill full viewport width */
+html, body, #root, #main {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden;
+}
