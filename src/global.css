@@ -9,3 +9,8 @@ html, body, #root, #main {
   max-width: 100% !important;
   overflow-x: hidden;
 }
+
+/* Set StackSans-Headline as the global font family for web */
+*, *::before, *::after {
+  font-family: 'StackSans-Headline', sans-serif;
+}
