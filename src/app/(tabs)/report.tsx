@@ -16,12 +16,15 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ISSUE_TYPES = [
-    'Illegal Dumping',
-    'Missed Collection',
-    'Overflowing Bin',
-    'Damaged Bin',
-    'Hazardous Waste',
-    'Other',
+    'Drainage blockage',
+    'E-waste',
+    'Hazardous waste',
+    'Organic waste',
+    'Plastic waste',
+    'Bulky waste',
+    'Mixed waste',
+    'Overflowing bin/s',
+    'Illegal dumping',
 ];
 
 export default function ReportScreen() {
@@ -158,7 +161,7 @@ export default function ReportScreen() {
                         disabled={submitting}
                         style={{ opacity: submitting ? 0.7 : 1 }}
                     >
-                        <Text style={{ fontFamily: 'PlusJakartaSans-Bold', fontSize: 15, color: '#fff', letterSpacing: 1.5 }}>
+                        <Text style={{ fontFamily: 'PlusJakartaSans-ExtraBold', fontSize: 15, color: '#fff', letterSpacing: 1.5, fontWeight: '800' }}>
                             {submitting ? 'SUBMITTING...' : 'SUBMIT REPORT'}
                         </Text>
                     </TouchableOpacity>

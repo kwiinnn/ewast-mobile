@@ -2,9 +2,9 @@
 
 /* Alias the Google Font to the name used in code */
 @font-face {
-  font-family: 'PlusJakartaSans-Bold';
-  src: local('Plus Jakarta Sans Bold'), local('Plus Jakarta Sans');
-  font-weight: 700;
+  font-family: 'PlusJakartaSans-ExtraBold';
+  src: local('Plus Jakarta Sans ExtraBold'), local('Plus Jakarta Sans');
+  font-weight: 800;
   font-style: normal;
 }
 

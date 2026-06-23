@@ -3,7 +3,6 @@ import { useRouter } from 'expo-router';
 import { AlertTriangle, ChevronDown, MapPin, UserLock } from 'lucide-react-native';
 import { useState } from 'react';
 import {
-    Platform,
     ScrollView,
     Text,
     TextInput,
@@ -13,12 +12,15 @@ import {
 } from 'react-native';
 
 const ISSUE_TYPES = [
-    'Illegal Dumping',
-    'Missed Collection',
-    'Overflowing Bin',
-    'Damaged Bin',
-    'Hazardous Waste',
-    'Other',
+    'Drainage blockage',
+    'E-waste',
+    'Hazardous waste',
+    'Organic waste',
+    'Plastic waste',
+    'Bulky waste',
+    'Mixed waste',
+    'Overflowing bin/s',
+    'Illegal dumping',
 ];
 
 const DESKTOP_BREAKPOINT = 768;
@@ -107,6 +109,7 @@ export default function ReportScreen() {
                 <View
                     className="bg-[#F0F4F1]"
                     style={{
+                        overflow: 'visible',
                         ...(isDesktop && {
                             backgroundColor: '#fff',
                             borderRadius: 24,
@@ -126,7 +129,7 @@ export default function ReportScreen() {
                         </View>
                     )}
 
-                    <View style={{ paddingHorizontal: isDesktop ? 0 : 20 }}>
+                    <View style={{ paddingHorizontal: isDesktop ? 0 : 20, overflow: 'visible' }}>
                         {/* Location */}
                         <Text className="text-[15px] font-extrabold text-[#233329] mb-3">Location</Text>
 
@@ -146,12 +149,77 @@ export default function ReportScreen() {
 
                         {/* Type of Report */}
                         <Text className="text-[15px] font-extrabold text-[#233329] mb-3">Type of Report</Text>
-                        <View className="relative mb-6">
+
+                        {/* Dropdown wrapper — overflow visible so the list floats above */}
+                        <View style={{ position: 'relative', zIndex: 10, overflow: 'visible', marginBottom: 24 }}>
+
+                            {/* Options list — floats above the trigger */}
+                            {dropdownOpen && (
+                                <View
+                                    style={{
+                                        position: 'absolute',
+                                        top: 52,
+                                        left: 0,
+                                        right: 0,
+                                        backgroundColor: '#fff',
+                                        borderWidth: 1,
+                                        borderColor: '#16A637',
+                                        borderTopLeftRadius: 0,
+                                        borderTopRightRadius: 0,
+                                        borderBottomLeftRadius: 12,
+                                        borderBottomRightRadius: 12,
+                                        borderTopWidth: 0,
+                                        overflow: 'hidden',
+                                        zIndex: 10,
+                                        shadowColor: '#000',
+                                        shadowOpacity: 0.08,
+                                        shadowRadius: 8,
+                                        elevation: 8,
+                                    }}
+                                >
+                                    {ISSUE_TYPES.map((type, i) => (
+                                        <TouchableOpacity
+                                            key={type}
+                                            style={{
+                                                paddingHorizontal: 16,
+                                                paddingVertical: 13,
+                                                borderBottomWidth: i < ISSUE_TYPES.length - 1 ? 1 : 0,
+                                                borderBottomColor: '#F0F4F1',
+                                                backgroundColor: issueType === type ? '#F0FBF3' : '#fff',
+                                            }}
+                                            onPress={() => { setIssueType(type); setDropdownOpen(false); }}
+                                        >
+                                            <Text style={{
+                                                fontSize: 14,
+                                                color: issueType === type ? '#16A637' : '#233329',
+                                                fontWeight: issueType === type ? '700' : '400',
+                                            }}>
+                                                {type}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            )}
+
+                            {/* Trigger */}
                             <TouchableOpacity
-                                className="bg-white border border-[#E5E7EB] rounded-[12px] px-4 h-[48px] flex-row items-center justify-between"
+                                style={{
+                                    backgroundColor: '#fff',
+                                    borderWidth: 1,
+                                    borderColor: dropdownOpen ? '#16A637' : '#E5E7EB',
+                                    borderTopLeftRadius: 12,
+                                    borderTopRightRadius: 12,
+                                    borderBottomLeftRadius: dropdownOpen ? 0 : 12,
+                                    borderBottomRightRadius: dropdownOpen ? 0 : 12,
+                                    paddingHorizontal: 16,
+                                    height: 48,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                }}
                                 onPress={() => setDropdownOpen(!dropdownOpen)}
                             >
-                                <Text className={issueType ? 'text-[#233329] text-sm' : 'text-[#8F9BB3] text-sm'}>
+                                <Text style={{ fontSize: 14, color: issueType ? '#233329' : '#8F9BB3' }}>
                                     {issueType || 'Select issue type...'}
                                 </Text>
                                 <ChevronDown
@@ -161,24 +229,6 @@ export default function ReportScreen() {
                                 />
                             </TouchableOpacity>
 
-                            {dropdownOpen && (
-                                <View
-                                    className="absolute left-0 right-0 bg-white rounded-[12px] border border-[#E5E7EB] overflow-hidden"
-                                    style={{ top: 52, zIndex: 100, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 12, elevation: 8 }}
-                                >
-                                    {ISSUE_TYPES.map((type, i) => (
-                                        <TouchableOpacity
-                                            key={type}
-                                            className={`px-4 py-3.5 ${i < ISSUE_TYPES.length - 1 ? 'border-b border-[#F0F4F1]' : ''}`}
-                                            onPress={() => { setIssueType(type); setDropdownOpen(false); }}
-                                        >
-                                            <Text className={`text-sm ${issueType === type ? 'text-[#16A637] font-bold' : 'text-[#233329]'}`}>
-                                                {type}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            )}
                         </View>
 
                         {/* Description */}
@@ -207,11 +257,11 @@ export default function ReportScreen() {
                         >
                             <Text
                                 style={{
-                                    fontFamily: 'PlusJakartaSans-Bold',
+                                    fontFamily: 'PlusJakartaSans-ExtraBold',
                                     fontSize: 15,
                                     color: '#fff',
                                     letterSpacing: 1.5,
-                                    fontWeight: '700',
+                                    fontWeight: '800',
                                 }}
                             >
                                 {submitting ? 'SUBMITTING...' : 'SUBMIT REPORT'}
