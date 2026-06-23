@@ -142,7 +142,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
                         accessibilityRole="button"
                         accessibilityState={isFocused ? { selected: true } : {}}
                         onPress={onPress}
-                        className={`items-center justify-center ${isFocused ? 'bg-[#16A637] w-[64px] h-[64px] rounded-full' : 'w-[64px] h-[64px]'}`}
+                        className={`items-center justify-center ${isFocused ? 'bg-[#16A637] w-[76px] h-[64px] rounded-full shadow' : 'w-[64px] h-[64px]'}`}
                     >
                         {route.name === 'index' && <Home size={24} color={color} />}
                         {route.name === 'report' && <PlusSquare size={24} color={color} />}
