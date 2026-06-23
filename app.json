@@ -36,7 +36,8 @@
           }
         }
       ],
-      "expo-image"
+      "expo-image",
+      "@maplibre/maplibre-react-native"
     ],
     "experiments": {
       "typedRoutes": true,
