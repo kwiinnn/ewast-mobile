@@ -14,6 +14,7 @@ import {
     View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Map as MapLibreMap, Camera, GeoJSONSource, Layer } from '@maplibre/maplibre-react-native';
 
 const ISSUE_TYPES = [
     'Drainage blockage',
@@ -33,6 +34,7 @@ export default function ReportScreen() {
     const insets = useSafeAreaInsets();
 
     const [location] = useState('Tupas Street, Matina Crossing, Davao City');
+    const [coordinates, setCoordinates] = useState<[number, number]>([125.6010, 7.0650]);
     const [issueType, setIssueType] = useState('');
     const [description, setDescription] = useState('');
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -46,6 +48,8 @@ export default function ReportScreen() {
         setSubmitting(true);
         await new Promise((r) => setTimeout(r, 800));
         setSubmitting(false);
+        // Payload includes coordinates for AWS API
+        // { issueType, description, coordinates, location }
         Alert.alert('Report Submitted', 'Thank you! Your report has been submitted.');
         setIssueType('');
         setDescription('');
@@ -110,13 +114,51 @@ export default function ReportScreen() {
                     {/* Location label */}
                     <Text className="text-[15px] font-extrabold text-[#233329] mb-3">Location</Text>
 
-                    {/* Map placeholder */}
+                    {/* Map container */}
                     <View
-                        className="rounded-[16px] overflow-hidden mb-3 bg-[#D9E8D4] items-center justify-center"
-                        style={{ height: 180 }}
+                        style={{
+                            height: 200,
+                            borderRadius: 16,
+                            overflow: 'hidden',
+                            marginBottom: 12,
+                        }}
                     >
-                        <MapPin size={36} color="#16A637" />
-                        <Text className="text-[#16A637] font-bold mt-2 text-sm">Map View</Text>
+                        <MapLibreMap
+                            style={{ flex: 1 }}
+                            mapStyle="https://tiles.openfreemap.org/styles/liberty"
+                            logo={false}
+                            attribution={false}
+                            onPress={(e: any) => {
+                                const coords = e?.geometry?.coordinates;
+                                if (coords) setCoordinates(coords as [number, number]);
+                            }}
+                        >
+                            <Camera
+                                initialViewState={{
+                                    centerCoordinate: coordinates,
+                                    zoomLevel: 15,
+                                }}
+                            />
+                            <GeoJSONSource
+                                id="pin-source"
+                                data={{
+                                    type: 'Feature',
+                                    geometry: { type: 'Point', coordinates },
+                                    properties: {},
+                                }}
+                            >
+                                <Layer
+                                    id="pin-circle"
+                                    type="circle"
+                                    style={{
+                                        circleRadius: 10,
+                                        circleColor: '#16A637',
+                                        circleStrokeWidth: 3,
+                                        circleStrokeColor: '#ffffff',
+                                    }}
+                                />
+                            </GeoJSONSource>
+                        </MapLibreMap>
                     </View>
 
                     {/* Address input */}

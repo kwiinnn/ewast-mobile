@@ -1,7 +1,7 @@
 import { useAuth } from '@/components/AuthContext';
 import { useRouter } from 'expo-router';
-import { AlertTriangle, ChevronDown, MapPin, UserLock } from 'lucide-react-native';
-import { useState } from 'react';
+import { AlertTriangle, ChevronDown, UserLock } from 'lucide-react-native';
+import { useEffect, useRef, useState } from 'react';
 import {
     ScrollView,
     Text,
@@ -25,6 +25,69 @@ const ISSUE_TYPES = [
 
 const DESKTOP_BREAKPOINT = 768;
 
+// ── Web map component using maplibre-gl ────────────────────────────────────
+const DAVAO: [number, number] = [125.6010, 7.0650];
+
+function WebMap({ coordinates, onCoordinatesChange }: {
+    coordinates: [number, number];
+    onCoordinatesChange: (coords: [number, number]) => void;
+}) {
+    const containerRef = useRef<any>(null);
+    const mapRef = useRef<any>(null);
+    const markerRef = useRef<any>(null);
+
+    useEffect(() => {
+        let map: any;
+        let marker: any;
+        import('maplibre-gl').then(({ Map, Marker }) => {
+            if (!containerRef.current || mapRef.current) return;
+            map = new Map({
+                container: containerRef.current,
+                style: 'https://tiles.openfreemap.org/styles/liberty',
+                center: coordinates,
+                zoom: 15,
+                attributionControl: false,
+            });
+            mapRef.current = map;
+
+            const el = document.createElement('div');
+            el.style.cssText = 'width:20px;height:20px;border-radius:50%;background:#16A637;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);cursor:pointer';
+            marker = new Marker({ element: el, draggable: true })
+                .setLngLat(coordinates)
+                .addTo(map);
+            markerRef.current = marker;
+
+            marker.on('dragend', () => {
+                const lngLat = marker.getLngLat();
+                onCoordinatesChange([lngLat.lng, lngLat.lat]);
+            });
+
+            map.on('click', (e: any) => {
+                const { lng, lat } = e.lngLat;
+                marker.setLngLat([lng, lat]);
+                onCoordinatesChange([lng, lat]);
+            });
+        });
+        return () => {
+            mapRef.current?.remove();
+            mapRef.current = null;
+            markerRef.current = null;
+        };
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Sync marker when coordinates change externally
+    useEffect(() => {
+        markerRef.current?.setLngLat(coordinates);
+    }, [coordinates]);
+
+    return (
+        <div
+            ref={containerRef}
+            style={{ width: '100%', height: '100%', borderRadius: 16, overflow: 'hidden' }}
+        />
+    );
+}
+
 export default function ReportScreen() {
     const { isLoggedIn } = useAuth();
     const router = useRouter();
@@ -32,6 +95,7 @@ export default function ReportScreen() {
     const isDesktop = width >= DESKTOP_BREAKPOINT;
 
     const [location] = useState('Tupas Street, Matina Crossing, Davao City');
+    const [coordinates, setCoordinates] = useState<[number, number]>(DAVAO);
     const [issueType, setIssueType] = useState('');
     const [description, setDescription] = useState('');
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -43,6 +107,8 @@ export default function ReportScreen() {
         setSubmitting(true);
         await new Promise((r) => setTimeout(r, 800));
         setSubmitting(false);
+        // Payload includes coordinates for AWS API
+        // { issueType, description, coordinates, location }
         setSubmitted(true);
         setTimeout(() => {
             setSubmitted(false);
@@ -133,13 +199,19 @@ export default function ReportScreen() {
                         {/* Location */}
                         <Text className="text-[15px] font-extrabold text-[#233329] mb-3">Location</Text>
 
-                        {/* Map placeholder */}
+                        {/* maplibre-gl web map */}
                         <View
-                            className="rounded-[16px] bg-[#D9E8D4] items-center justify-center mb-3"
-                            style={{ height: 200 }}
+                            style={{
+                                height: 200,
+                                borderRadius: 16,
+                                overflow: 'hidden',
+                                marginBottom: 12,
+                            }}
                         >
-                            <MapPin size={36} color="#16A637" />
-                            <Text className="text-[#16A637] font-bold mt-2 text-sm">Map View</Text>
+                            <WebMap
+                                coordinates={coordinates}
+                                onCoordinatesChange={setCoordinates}
+                            />
                         </View>
 
                         {/* Address */}
