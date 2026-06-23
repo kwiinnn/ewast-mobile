@@ -1,10 +1,9 @@
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import { Image } from 'expo-image';
-import { Bell, Search, Clock, CalendarDays, Map as MapIcon, Truck } from 'lucide-react-native';
 import { useAuth } from '@/components/AuthContext';
+import Logo from '@/components/logo';
+import { Bell, CalendarDays, Clock, Map as MapIcon, Search, Truck } from 'lucide-react-native';
+import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const LOGO_URI = require("@/assets/logo.svg");
 
 export default function HomeScreen() {
   const { isLoggedIn } = useAuth();
@@ -16,7 +15,7 @@ export default function HomeScreen() {
       <View className="flex-row justify-between items-center px-6 py-4 mt-2">
         <View className="flex-row items-center">
             {/* Using the logo as an image */}
-            <Image source={LOGO_URI} style={{ width: 140, height: 36 }} contentFit="contain" />
+            <Logo height={50} />
         </View>
         {isLoggedIn && (
           <TouchableOpacity className="relative mr-2">

@@ -1,8 +1,8 @@
-import "../global.css";
-import { Stack } from 'expo-router';
 import { AuthProvider } from '@/components/AuthContext';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Text, TextInput } from 'react-native';
+import "../global.css";
 
 // Set global font
 if (!(Text as any).defaultProps) (Text as any).defaultProps = {};
@@ -17,8 +17,6 @@ export default function RootLayout() {
       <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="login" />
-        <Stack.Screen name="signup" />
       </Stack>
     </AuthProvider>
   );
