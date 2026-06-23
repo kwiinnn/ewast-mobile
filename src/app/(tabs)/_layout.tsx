@@ -2,7 +2,7 @@ import { useAuth } from '@/components/AuthContext';
 import Logo from '@/components/logo';
 import { Tabs, useRouter } from 'expo-router';
 import { Bell, Home, Map, PlusSquare, User, UserPlus } from 'lucide-react-native';
-import { Platform, Pressable, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { Platform, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const DESKTOP_BREAKPOINT = 768;

@@ -86,7 +86,6 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                                 </View>
                                 <Text
                                     style={{
-                                        fontFamily: 'StackSans-Text',
                                         fontSize: 12,
                                         color: isCompleted || isActive ? AuthColors.dark : AuthColors.placeholder,
                                         marginTop: 6,
@@ -129,7 +128,7 @@ function StepBanner({ step }: { step: number }) {
                 paddingHorizontal: 16,
             }}
         >
-            <Text style={{ fontFamily: 'StackSans-Headline', fontSize: 14, color: AuthColors.green }}>
+            <Text style={{ fontSize: 14, color: AuthColors.green }}>
                 Step {step} of 3
             </Text>
         </View>
@@ -151,10 +150,10 @@ function Step1Profile({
 }) {
     return (
         <View className="bg-white rounded-2xl mx-4 mt-4 p-6 shadow-sm">
-            <Text style={{ fontFamily: 'StackSans-Headline', fontSize: 22, color: AuthColors.dark, marginBottom: 4 }}>
+            <Text style={{ fontSize: 22, color: AuthColors.dark, marginBottom: 4 }}>
                 Your Profile
             </Text>
-            <Text style={{ fontFamily: 'StackSans-Text', fontSize: 14, color: AuthColors.dark, opacity: 0.6, marginBottom: 20 }}>
+            <Text style={{ fontSize: 14, color: AuthColors.dark, opacity: 0.6, marginBottom: 20 }}>
                 Tell us about yourself!
             </Text>
 
@@ -189,7 +188,7 @@ function Step1Profile({
                 }}
                 activeOpacity={0.85}
             >
-                <Text style={{ fontFamily: 'StackSans-Headline', fontSize: 16, color: '#fff' }}>Continue</Text>
+                <Text style={{ fontSize: 16, color: '#fff' }}>Continue</Text>
             </TouchableOpacity>
         </View>
     );
@@ -212,10 +211,10 @@ function Step2Security({
 }) {
     return (
         <View className="bg-white rounded-2xl mx-4 mt-4 p-6 shadow-sm">
-            <Text style={{ fontFamily: 'StackSans-Headline', fontSize: 22, color: AuthColors.dark, marginBottom: 4 }}>
+            <Text style={{ fontSize: 22, color: AuthColors.dark, marginBottom: 4 }}>
                 Account Security
             </Text>
-            <Text style={{ fontFamily: 'StackSans-Text', fontSize: 14, color: AuthColors.dark, opacity: 0.6, marginBottom: 20 }}>
+            <Text style={{ fontSize: 14, color: AuthColors.dark, opacity: 0.6, marginBottom: 20 }}>
                 Secure your account! Password must contain at least 8 characters
             </Text>
 
@@ -251,7 +250,7 @@ function Step2Security({
                     }}
                     activeOpacity={0.75}
                 >
-                    <Text style={{ fontFamily: 'StackSans-Headline', fontSize: 15, color: AuthColors.green }}>Back</Text>
+                    <Text style={{ fontSize: 15, color: AuthColors.green }}>Back</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={onContinue}
@@ -264,7 +263,7 @@ function Step2Security({
                     }}
                     activeOpacity={0.85}
                 >
-                    <Text style={{ fontFamily: 'StackSans-Headline', fontSize: 15, color: '#fff' }}>Continue</Text>
+                    <Text style={{ fontSize: 15, color: '#fff' }}>Continue</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -286,12 +285,12 @@ function ReviewRow({
 }) {
     return (
         <View className="mb-5">
-            <Text style={{ fontFamily: 'StackSans-Text', fontSize: 12, color: AuthColors.green, marginBottom: 2 }}>
+            <Text style={{ fontSize: 12, color: AuthColors.green, marginBottom: 2 }}>
                 {label}
             </Text>
             <View className="flex-row items-center" style={{ gap: 10 }}>
                 <Icon width={18} height={18} color={AuthColors.dark} />
-                <Text style={{ fontFamily: 'StackSans-Text', fontSize: 15, color: AuthColors.dark }}>
+                <Text style={{ fontSize: 15, color: AuthColors.dark }}>
                     {masked ? '•'.repeat(Math.max(value.length, 10)) : value}
                 </Text>
             </View>
@@ -312,10 +311,10 @@ function Step3Review({
 }) {
     return (
         <View className="bg-white rounded-2xl mx-4 mt-4 p-6 shadow-sm">
-            <Text style={{ fontFamily: 'StackSans-Headline', fontSize: 22, color: AuthColors.dark, marginBottom: 4 }}>
+            <Text style={{ fontSize: 22, color: AuthColors.dark, marginBottom: 4 }}>
                 Review Details
             </Text>
-            <Text style={{ fontFamily: 'StackSans-Text', fontSize: 14, color: AuthColors.dark, opacity: 0.6, marginBottom: 20 }}>
+            <Text style={{ fontSize: 14, color: AuthColors.dark, opacity: 0.6, marginBottom: 20 }}>
                 Almost done! Review and confirm your account details
             </Text>
 
@@ -337,7 +336,7 @@ function Step3Review({
                     }}
                     activeOpacity={0.75}
                 >
-                    <Text style={{ fontFamily: 'StackSans-Headline', fontSize: 15, color: AuthColors.green }}>Back</Text>
+                    <Text style={{ fontSize: 15, color: AuthColors.green }}>Back</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={onCreate}
@@ -352,7 +351,7 @@ function Step3Review({
                     }}
                     activeOpacity={0.85}
                 >
-                    <Text style={{ fontFamily: 'StackSans-Headline', fontSize: 15, color: '#fff' }}>
+                    <Text style={{ fontSize: 15, color: '#fff' }}>
                         {loading ? 'Creating…' : 'Create'}
                     </Text>
                 </TouchableOpacity>

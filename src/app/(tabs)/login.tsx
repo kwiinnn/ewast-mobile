@@ -130,7 +130,7 @@ export default function LoginScreen() {
                             >
                                 <Text
                                     className="text-base"
-                                    style={{ color: AuthColors.white, fontFamily: 'StackSans-Headline' }}
+                                    style={{ color: AuthColors.white}}
                                 >
                                     {loading ? 'Logging in…' : 'Login'}
                                 </Text>
@@ -140,14 +140,14 @@ export default function LoginScreen() {
                             <View className="flex-row justify-center mt-5">
                                 <Text
                                     className="text-sm"
-                                    style={{ color: AuthColors.dark, fontFamily: 'StackSans-Text' }}
+                                    style={{ color: AuthColors.dark}}
                                 >
                                     Need an account?{' '}
                                 </Text>
                                 <TouchableOpacity onPress={() => router.push('/signup')}>
                                     <Text
                                         className="text-sm"
-                                        style={{ color: AuthColors.green, fontFamily: 'StackSans-Headline' }}
+                                        style={{ color: AuthColors.green}}
                                     >
                                         Signup
                                     </Text>

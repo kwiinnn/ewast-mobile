@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
+import { LogOut, Mail, User as UserIcon } from 'lucide-react-native';
 import { Text, TouchableOpacity, View } from 'react-native';
-import { User as UserIcon, Mail, LogOut } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth, User } from '@/components/AuthContext';
@@ -16,7 +16,6 @@ function GuestView() {
 
             <Text
                 style={{
-                    fontFamily: 'StackSans-Headline',
                     fontSize: 24,
                     color: AuthColors.dark,
                     textAlign: 'center',
@@ -27,7 +26,6 @@ function GuestView() {
             </Text>
             <Text
                 style={{
-                    fontFamily: 'StackSans-Text',
                     fontSize: 14,
                     color: AuthColors.placeholder,
                     textAlign: 'center',

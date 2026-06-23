@@ -267,7 +267,6 @@ export default function LoginScreenWeb() {
                                 fontSize: 14,
                                 flex: 1,
                                 color: AuthColors.errorText,
-                                fontFamily: 'StackSans-Text',
                             }}
                         >
                             {error || ' '}
@@ -283,7 +282,6 @@ export default function LoginScreenWeb() {
                                 textAlign: 'center',
                                 color: '#233329',
                                 marginBottom: 40,
-                                fontFamily: 'StackSans-Headline',
                             }}
                         >
                             Login
@@ -323,17 +321,17 @@ export default function LoginScreenWeb() {
                             accessibilityRole="button"
                             accessibilityLabel="Log in"
                         >
-                            <Text style={{ fontSize: 16, color: AuthColors.white, fontFamily: 'StackSans-Headline' }}>
+                            <Text style={{ fontSize: 16, color: AuthColors.white}}>
                                 {loading ? 'Logging in…' : 'Login'}
                             </Text>
                         </TouchableOpacity>
 
                         <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 20 }}>
-                            <Text style={{ fontSize: 14, color: AuthColors.dark, fontFamily: 'StackSans-Text' }}>
+                            <Text style={{ fontSize: 14, color: AuthColors.dark}}>
                                 Need an account?{' '}
                             </Text>
                             <TouchableOpacity onPress={() => router.push('/signup')}>
-                                <Text style={{ fontSize: 14, color: AuthColors.green, fontFamily: 'StackSans-Headline' }}>
+                                <Text style={{ fontSize: 14, color: AuthColors.green}}>
                                     Signup
                                 </Text>
                             </TouchableOpacity>
