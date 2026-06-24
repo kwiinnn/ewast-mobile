@@ -47,7 +47,7 @@ function GuestView() {
             >
                 <Text
                     className="text-base"
-                    style={{color: AuthColors.green }}
+                    style={{ color: AuthColors.green }}
                 >
                     Create Account
                 </Text>
@@ -256,7 +256,7 @@ function ProfileView({ user }: { user: User }) {
                 </Text>
 
                 <View
-                    className="bg-white rounded-2xl px-4 py-3 flex-row items-center gap-5 mb-8"
+                    className="bg-white rounded-2xl px-4 py-3 flex-row items-center gap-4 mb-8"
                     style={{
                         shadowColor: '#000',
                         shadowOpacity: 0.04,
@@ -271,63 +271,65 @@ function ProfileView({ user }: { user: User }) {
                         <LanguageIcon width={22} height={22} color="#fff" />
                     </View>
 
-                    {/* English */}
-                    <TouchableOpacity
-                        onPress={() => setLanguage('english')}
-                        className="flex-row items-center gap-2"
-                        activeOpacity={0.7}
-                    >
-                        <View
-                            className="w-[22px] h-[22px] rounded-full border-2 items-center justify-center"
-                            style={{
-                                borderColor: language === 'english' ? AuthColors.green : '#C0C0C0',
-                            }}
+                    <View className="flex-1 flex-row items-center justify-center gap-8">
+                        {/* English */}
+                        <TouchableOpacity
+                            onPress={() => setLanguage('english')}
+                            className="flex-row items-center gap-2"
+                            activeOpacity={0.7}
                         >
-                            {language === 'english' && (
-                                <View
-                                    className="w-[11px] h-[11px] rounded-full"
-                                    style={{ backgroundColor: AuthColors.green }}
-                                />
-                            )}
-                        </View>
-                        <Text
-                            className="text-[15px]"
-                            style={{
-                                color: language === 'english' ? AuthColors.green : AuthColors.dark,
-                            }}
-                        >
-                            English
-                        </Text>
-                    </TouchableOpacity>
+                            <View
+                                className="w-[22px] h-[22px] rounded-full border-2 items-center justify-center"
+                                style={{
+                                    borderColor: language === 'english' ? AuthColors.green : '#C0C0C0',
+                                }}
+                            >
+                                {language === 'english' && (
+                                    <View
+                                        className="w-[11px] h-[11px] rounded-full"
+                                        style={{ backgroundColor: AuthColors.green }}
+                                    />
+                                )}
+                            </View>
+                            <Text
+                                className="text-[15px]"
+                                style={{
+                                    color: language === 'english' ? AuthColors.green : AuthColors.dark,
+                                }}
+                            >
+                                English
+                            </Text>
+                        </TouchableOpacity>
 
-                    {/* Bisaya */}
-                    <TouchableOpacity
-                        onPress={() => setLanguage('bisaya')}
-                        className="flex-row items-center gap-2"
-                        activeOpacity={0.7}
-                    >
-                        <View
-                            className="w-[22px] h-[22px] rounded-full border-2 items-center justify-center"
-                            style={{
-                                borderColor: language === 'bisaya' ? AuthColors.green : '#C0C0C0',
-                            }}
+                        {/* Bisaya */}
+                        <TouchableOpacity
+                            onPress={() => setLanguage('bisaya')}
+                            className="flex-row items-center gap-2"
+                            activeOpacity={0.7}
                         >
-                            {language === 'bisaya' && (
-                                <View
-                                    className="w-[11px] h-[11px] rounded-full"
-                                    style={{ backgroundColor: AuthColors.green }}
-                                />
-                            )}
-                        </View>
-                        <Text
-                            className="text-[15px]"
-                            style={{
-                                color: language === 'bisaya' ? AuthColors.green : AuthColors.dark,
-                            }}
-                        >
-                            Bisaya
-                        </Text>
-                    </TouchableOpacity>
+                            <View
+                                className="w-[22px] h-[22px] rounded-full border-2 items-center justify-center"
+                                style={{
+                                    borderColor: language === 'bisaya' ? AuthColors.green : '#C0C0C0',
+                                }}
+                            >
+                                {language === 'bisaya' && (
+                                    <View
+                                        className="w-[11px] h-[11px] rounded-full"
+                                        style={{ backgroundColor: AuthColors.green }}
+                                    />
+                                )}
+                            </View>
+                            <Text
+                                className="text-[15px]"
+                                style={{
+                                    color: language === 'bisaya' ? AuthColors.green : AuthColors.dark,
+                                }}
+                            >
+                                Bisaya
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 {/* ── Log Out ── */}

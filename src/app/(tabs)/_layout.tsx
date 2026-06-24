@@ -47,7 +47,7 @@ function WebHeader() {
                     <View className="flex-row items-center" style={{ gap: 20 }}>
                         {isLoggedIn ? (
                             <>
-                                <TouchableOpacity className="relative">
+                                <TouchableOpacity className="relative" onPress={() => navigateTo('/notifs')}>
                                     <Bell size={22} color="#233329" />
                                     <View className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#F0F4F1]" />
                                 </TouchableOpacity>
@@ -73,7 +73,7 @@ function WebHeader() {
                     <Logo height={50} />
                     <View className="flex-row items-center">
                         {isLoggedIn && (
-                            <TouchableOpacity className="relative mr-2">
+                            <TouchableOpacity className="relative mr-2" onPress={() => navigateTo('/notifs')}>
                                 <Bell size={26} color="#233329" />
                                 <View className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[#F0F4F1]" />
                             </TouchableOpacity>
