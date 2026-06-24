@@ -47,11 +47,11 @@ export function AuthInput({
             {/* Optional label row with error */}
             {label && (
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <Text style={{ fontFamily: 'StackSans-Text', fontSize: 13, color: AuthColors.green }}>
+                    <Text className="font-semibold" style={{ fontSize: 15, color: AuthColors.green }}>
                         {label}
                     </Text>
                     {error ? (
-                        <Text style={{ fontFamily: 'StackSans-Text', fontSize: 13, color: AuthColors.errorText }}>
+                        <Text style={{ fontSize: 13, color: AuthColors.errorText }}>
                             {error}
                         </Text>
                     ) : null}
@@ -77,7 +77,6 @@ export function AuthInput({
                     style={{
                         flex: 1,
                         marginLeft: 12,
-                        fontFamily: 'StackSans-Text',
                         fontSize: 14,
                         color: AuthColors.dark,
                     }}

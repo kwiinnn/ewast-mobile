@@ -5,11 +5,19 @@ import { Text, TextInput } from 'react-native';
 import "../global.css";
 
 // Set global font
-if (!(Text as any).defaultProps) (Text as any).defaultProps = {};
-(Text as any).defaultProps.style = { fontFamily: 'StackSans-Headline' };
+const DEFAULT_FONT = 'StackSans-Headline';
 
-if (!(TextInput as any).defaultProps) (TextInput as any).defaultProps = {};
-(TextInput as any).defaultProps.style = { fontFamily: 'StackSans-Headline' };
+(Text as any).defaultProps = (Text as any).defaultProps ?? {};
+(Text as any).defaultProps.style = [
+  { fontFamily: 'StackSans-Headline' },
+  (Text as any).defaultProps.style,
+];
+
+(TextInput as any).defaultProps = (TextInput as any).defaultProps ?? {};
+(TextInput as any).defaultProps.style = [
+  { fontFamily: 'StackSans-Headline' },
+  (TextInput as any).defaultProps.style,
+];
 
 export default function RootLayout() {
   return (

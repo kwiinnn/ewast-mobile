@@ -129,7 +129,7 @@ export default function LoginScreen() {
                                 accessibilityLabel="Log in"
                             >
                                 <Text
-                                    className="text-base"
+                                    className="text-base font-bold"
                                     style={{ color: AuthColors.white}}
                                 >
                                     {loading ? 'Logging in…' : 'Login'}

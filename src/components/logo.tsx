@@ -14,11 +14,10 @@ interface ScalableLogoProps {
 }
 
 export default function Logo({
-    height = 60,
+    height = 90,
     className = '',
     style,
     textColor = '#233329', // matches COLOR.dark from your design tokens
-    fontFamily = 'StackSans-Headline',
 }: ScalableLogoProps) {
     // --- SCALING MATHEMATICS ---
     // 1. The Trash Bin is square, so its width matches its height.
@@ -44,11 +43,11 @@ export default function Logo({
 
             {/* 2. THE LOGO TEXT */}
             <Text
+                className="font-bold"
                 style={{
                     fontSize: textHeight,
                     lineHeight: textHeight * 1.05,
                     color: textColor,
-                    fontFamily,
                     letterSpacing: textHeight * 0.04,
                 }}
             >

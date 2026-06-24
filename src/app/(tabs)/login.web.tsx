@@ -321,7 +321,7 @@ export default function LoginScreenWeb() {
                             accessibilityRole="button"
                             accessibilityLabel="Log in"
                         >
-                            <Text style={{ fontSize: 16, color: AuthColors.white}}>
+                            <Text className="font-bold" style={{ fontSize: 16, color: AuthColors.white}}>
                                 {loading ? 'Logging in…' : 'Login'}
                             </Text>
                         </TouchableOpacity>

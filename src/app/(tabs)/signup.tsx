@@ -85,6 +85,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                                     )}
                                 </View>
                                 <Text
+                                    className="font-semibold"
                                     style={{
                                         fontSize: 12,
                                         color: isCompleted || isActive ? AuthColors.dark : AuthColors.placeholder,
@@ -150,7 +151,7 @@ function Step1Profile({
 }) {
     return (
         <View className="bg-white rounded-2xl mx-4 mt-4 p-6 shadow-sm">
-            <Text style={{ fontSize: 22, color: AuthColors.dark, marginBottom: 4 }}>
+            <Text className="font-extrabold" style={{ fontSize: 22, color: AuthColors.dark, marginBottom: 4 }}>
                 Your Profile
             </Text>
             <Text style={{ fontSize: 14, color: AuthColors.dark, opacity: 0.6, marginBottom: 20 }}>
@@ -188,7 +189,7 @@ function Step1Profile({
                 }}
                 activeOpacity={0.85}
             >
-                <Text style={{ fontSize: 16, color: '#fff' }}>Continue</Text>
+                <Text className="font-bold" style={{ fontSize: 16, color: '#fff' }}>Continue</Text>
             </TouchableOpacity>
         </View>
     );
@@ -211,7 +212,7 @@ function Step2Security({
 }) {
     return (
         <View className="bg-white rounded-2xl mx-4 mt-4 p-6 shadow-sm">
-            <Text style={{ fontSize: 22, color: AuthColors.dark, marginBottom: 4 }}>
+            <Text className="font-extrabold" style={{ fontSize: 22, color: AuthColors.dark, marginBottom: 4 }}>
                 Account Security
             </Text>
             <Text style={{ fontSize: 14, color: AuthColors.dark, opacity: 0.6, marginBottom: 20 }}>
@@ -250,7 +251,7 @@ function Step2Security({
                     }}
                     activeOpacity={0.75}
                 >
-                    <Text style={{ fontSize: 15, color: AuthColors.green }}>Back</Text>
+                    <Text className="font-bold" style={{ fontSize: 15, color: AuthColors.green }}>Back</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={onContinue}
@@ -263,7 +264,7 @@ function Step2Security({
                     }}
                     activeOpacity={0.85}
                 >
-                    <Text style={{ fontSize: 15, color: '#fff' }}>Continue</Text>
+                    <Text className="font-bold" style={{ fontSize: 15, color: '#fff' }}>Continue</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -311,7 +312,7 @@ function Step3Review({
 }) {
     return (
         <View className="bg-white rounded-2xl mx-4 mt-4 p-6 shadow-sm">
-            <Text style={{ fontSize: 22, color: AuthColors.dark, marginBottom: 4 }}>
+            <Text className="font-extrabold" style={{ fontSize: 22, color: AuthColors.dark, marginBottom: 4 }}>
                 Review Details
             </Text>
             <Text style={{ fontSize: 14, color: AuthColors.dark, opacity: 0.6, marginBottom: 20 }}>
@@ -336,7 +337,7 @@ function Step3Review({
                     }}
                     activeOpacity={0.75}
                 >
-                    <Text style={{ fontSize: 15, color: AuthColors.green }}>Back</Text>
+                    <Text className="font-bold" style={{ fontSize: 15, color: AuthColors.green }}>Back</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={onCreate}
@@ -351,7 +352,7 @@ function Step3Review({
                     }}
                     activeOpacity={0.85}
                 >
-                    <Text style={{ fontSize: 15, color: '#fff' }}>
+                    <Text className="font-bold" style={{ fontSize: 15, color: '#fff' }}>
                         {loading ? 'Creating…' : 'Create'}
                     </Text>
                 </TouchableOpacity>
