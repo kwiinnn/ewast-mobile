@@ -1,75 +1,54 @@
 import { router } from 'expo-router';
-import { LogOut, Mail, User as UserIcon } from 'lucide-react-native';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { LogOut } from 'lucide-react-native';
+import { useState } from 'react';
+import { FlatList, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import LanguageIcon from '@/assets/icons/language.svg';
+import LocationIcon from '@/assets/icons/location.svg';
 import { useAuth, User } from '@/components/AuthContext';
 import Logo from '@/components/logo';
 import { AuthColors } from '@/constants/auth-colors';
+import { BARANGAY_OPTIONS } from '@/constants/barangays';
 
-// ─── Guest View (not logged in) ─────────────────────────────────────────────
+// ─── Guest View ───────────────────────────────────────────────────────────────
 
 function GuestView() {
     return (
         <View className="flex-1 items-center justify-center px-8">
             <Logo height={70} className="mb-6" />
 
-            <Text
-                style={{
-                    fontSize: 24,
-                    color: AuthColors.dark,
-                    textAlign: 'center',
-                    marginBottom: 8,
-                }}
-            >
+            <Text className="text-2xl text-center mb-2" style={{ color: AuthColors.dark }}>
                 Welcome to EWAST
             </Text>
             <Text
-                style={{
-                    fontSize: 14,
-                    color: AuthColors.placeholder,
-                    textAlign: 'center',
-                    marginBottom: 32,
-                    lineHeight: 20,
-                }}
+                className="text-sm text-center mb-8 leading-5"
+                style={{ color: AuthColors.placeholder }}
             >
                 Sign in to access your profile, report waste, and track collection schedules
             </Text>
 
-            {/* Sign In button */}
             <TouchableOpacity
                 onPress={() => router.push('/login')}
-                style={{
-                    backgroundColor: AuthColors.green,
-                    borderRadius: 50,
-                    height: 52,
-                    width: '100%',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: 12,
-                }}
+                className="w-full h-13 rounded-full items-center justify-center mb-3"
+                style={{ backgroundColor: AuthColors.green }}
                 activeOpacity={0.85}
             >
-                <Text style={{ fontFamily: 'StackSans-Headline', fontSize: 16, color: '#fff' }}>
+                <Text className="text-white text-base">
                     Sign In
                 </Text>
             </TouchableOpacity>
 
-            {/* Create Account button */}
             <TouchableOpacity
                 onPress={() => router.push('/signup')}
-                style={{
-                    borderWidth: 1.5,
-                    borderColor: AuthColors.green,
-                    borderRadius: 50,
-                    height: 52,
-                    width: '100%',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }}
+                className="w-full h-13 rounded-full items-center justify-center border-[1.5px]"
+                style={{ borderColor: AuthColors.green }}
                 activeOpacity={0.75}
             >
-                <Text style={{ fontFamily: 'StackSans-Headline', fontSize: 16, color: AuthColors.green }}>
+                <Text
+                    className="text-base"
+                    style={{ color: AuthColors.green }}
+                >
                     Create Account
                 </Text>
             </TouchableOpacity>
@@ -77,101 +56,320 @@ function GuestView() {
     );
 }
 
-// ─── Profile View (logged in) ───────────────────────────────────────────────
+// ─── Barangay Dropdown (native bottom-sheet) ──────────────────────────────────
+
+function BarangayDropdown() {
+    const [selected, setSelected] = useState<string | null>(null);
+    const [open, setOpen] = useState(false);
+
+    return (
+        <>
+            <TouchableOpacity
+                onPress={() => setOpen(true)}
+                className="flex-1 flex-row items-center justify-between px-1"
+                style={{ height: 44 }}
+                activeOpacity={0.7}
+            >
+                <Text
+                    className="flex-1 text-sm"
+                    style={{ color: selected ? AuthColors.dark : AuthColors.placeholder }}
+                    numberOfLines={1}
+                >
+                    {selected ?? 'Search Location'}
+                </Text>
+                <Text className="text-xs" style={{ color: AuthColors.placeholder }}>▾</Text>
+            </TouchableOpacity>
+
+            <Modal
+                visible={open}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setOpen(false)}
+            >
+                <TouchableOpacity
+                    className="flex-1 bg-black/35"
+                    activeOpacity={1}
+                    onPress={() => setOpen(false)}
+                />
+                <View className="bg-white rounded-t-3xl pt-3 pb-8" style={{ maxHeight: '60%' }}>
+                    {/* Handle */}
+                    <View className="w-10 h-1 rounded-full bg-gray-200 self-center mb-3" />
+
+                    <Text
+                        className="text-base text-center mb-2"
+                        style={{ color: AuthColors.dark }}
+                    >
+                        Select Barangay
+                    </Text>
+
+                    <FlatList
+                        data={BARANGAY_OPTIONS}
+                        keyExtractor={(item) => item}
+                        renderItem={({ item }) => (
+                            <TouchableOpacity
+                                onPress={() => { setSelected(item); setOpen(false); }}
+                                className="py-3.5 px-6 border-b border-gray-100"
+                                style={{
+                                    backgroundColor:
+                                        selected === item ? AuthColors.greenLight : '#fff',
+                                }}
+                                activeOpacity={0.7}
+                            >
+                                <Text
+                                    className="text-[15px]"
+                                    style={{
+                                        color: selected === item ? AuthColors.green : AuthColors.dark,
+                                    }}
+                                >
+                                    {item}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                    />
+                </View>
+            </Modal>
+        </>
+    );
+}
+
+// ─── Profile View ─────────────────────────────────────────────────────────────
 
 function ProfileView({ user }: { user: User }) {
     const { logout } = useAuth();
+    const [language, setLanguage] = useState<'english' | 'bisaya'>('english');
 
     return (
-        <View className="flex-1 px-6">
-            {/* Profile card */}
-            <View
-                className="bg-white rounded-[32px] px-6 py-8 shadow-sm mt-6"
-                style={{ elevation: 2 }}
-            >
-                {/* Avatar circle */}
-                <View style={{ alignItems: 'center', marginBottom: 20 }}>
+        <ScrollView
+            className="flex-1"
+            contentContainerClassName="px-6 pb-10"
+            showsVerticalScrollIndicator={false}
+        >
+            {/* ── Profile Card ── */}
+            <View className="bg-white rounded-3xl px-6 py-7 mb-6 shadow-sm" style={{ elevation: 2 }}>
+                {/* Avatar */}
+                <View className="items-center mb-3">
                     <View
-                        style={{
-                            width: 80,
-                            height: 80,
-                            borderRadius: 40,
-                            backgroundColor: AuthColors.greenLight,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
+                        className="w-20 h-20 rounded-full items-center justify-center mb-2.5"
+                        style={{ backgroundColor: AuthColors.greenLight }}
                     >
-                        <UserIcon size={36} color={AuthColors.green} />
+                        {/* Head */}
+                        <View
+                            className="w-4 h-4 rounded-full border-[2.5px] mb-1"
+                            style={{ borderColor: AuthColors.green }}
+                        />
+                        {/* Shoulders */}
+                        <View
+                            className="w-7 h-3.5 border-[2.5px] border-b-0 rounded-tl-[14px] rounded-tr-[14px]"
+                            style={{ borderColor: AuthColors.green }}
+                        />
                     </View>
+
+                    <Text
+                        className="font-extrabold text-lg text-center"
+                        style={{ color: AuthColors.dark }}
+                    >
+                        {user.fullName}
+                    </Text>
+                    <Text
+                        className="text-[13px] text-center mt-0.5"
+                        style={{ color: AuthColors.placeholder }}
+                    >
+                        {user.email}
+                    </Text>
                 </View>
 
-                {/* Info rows */}
-                <View style={{ gap: 16 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                        <UserIcon size={20} color={AuthColors.placeholder} />
-                        <View>
-                            <Text style={{ fontFamily: 'StackSans-Text', fontSize: 12, color: AuthColors.green }}>
-                                Full Name
-                            </Text>
-                            <Text style={{ fontFamily: 'StackSans-Headline', fontSize: 16, color: AuthColors.dark }}>
-                                {user.fullName}
-                            </Text>
-                        </View>
+                {/* Divider */}
+                <View className="h-px bg-gray-100 my-4" />
+
+                {/* Stats */}
+                <View className="flex-row items-center justify-around">
+                    <View className="flex-1 items-center">
+                        <Text
+                            className="text-[22px]"
+                            style={{ color: AuthColors.green }}
+                        >
+                            5
+                        </Text>
+                        <Text
+                            className="text-xs"
+                            style={{ color: AuthColors.dark }}
+                        >
+                            Reports
+                        </Text>
                     </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                        <Mail size={20} color={AuthColors.placeholder} />
-                        <View>
-                            <Text style={{ fontFamily: 'StackSans-Text', fontSize: 12, color: AuthColors.green }}>
-                                Email
-                            </Text>
-                            <Text style={{ fontFamily: 'StackSans-Headline', fontSize: 16, color: AuthColors.dark }}>
-                                {user.email}
-                            </Text>
-                        </View>
+
+                    <View className="w-px h-9 bg-gray-200" />
+
+                    <View className="flex-1 items-center">
+                        <Text
+                            className="text-[22px]"
+                            style={{ color: AuthColors.green }}
+                        >
+                            3
+                        </Text>
+                        <Text
+                            className="text-xs"
+                            style={{ color: AuthColors.dark }}
+                        >
+                            Resolved
+                        </Text>
+                    </View>
+
+                    <View className="w-px h-9 bg-gray-200" />
+
+                    <View className="flex-1 items-center">
+                        <Text
+                            className="text-[22px]"
+                            style={{ color: AuthColors.green }}
+                        >
+                            2
+                        </Text>
+                        <Text
+                            className="text-xs"
+                            style={{ color: AuthColors.dark }}
+                        >
+                            Pending
+                        </Text>
                     </View>
                 </View>
             </View>
 
-            {/* Logout button */}
+            {/* ── BARANGAY ── */}
+            <Text
+                className="font-bold text-[16px] tracking-widest mb-2.5"
+                style={{ color: AuthColors.green }}
+            >
+                BARANGAY
+            </Text>
+
+            <View
+                className="bg-white rounded-2xl px-4 py-3 flex-row items-center gap-3 mb-6"
+                style={{ elevation: 1 }}
+            >
+                <View
+                    className="w-12 h-12 rounded-[14px] items-center justify-center shrink-0"
+                    style={{ backgroundColor: AuthColors.dark }}
+                >
+                    <LocationIcon width={22} height={22} color="#fff" />
+                </View>
+
+                <View
+                    className="flex-1 h-11 border border-[#233329] rounded-full px-4 justify-center overflow-hidden bg-[#F0F4F1]"
+                >
+                    <BarangayDropdown />
+                </View>
+            </View>
+
+            {/* ── LANGUAGE ── */}
+            <Text
+                className="font-bold text-[16px] tracking-widest mb-2.5"
+                style={{ color: AuthColors.green }}
+            >
+                LANGUAGE
+            </Text>
+
+            <View
+                className="bg-white rounded-2xl px-4 py-3 flex-row items-center gap-4 mb-8"
+                style={{ elevation: 1 }}
+            >
+                <View
+                    className="w-12 h-12 rounded-[14px] items-center justify-center shrink-0"
+                    style={{ backgroundColor: AuthColors.dark }}
+                >
+                    <LanguageIcon width={22} height={22} color="#fff" />
+                </View>
+
+                {/* English */}
+                <TouchableOpacity
+                    onPress={() => setLanguage('english')}
+                    className="flex-row items-center gap-2"
+                    activeOpacity={0.7}
+                >
+                    <View
+                        className="w-[22px] h-[22px] rounded-full border-2 items-center justify-center"
+                        style={{
+                            borderColor: language === 'english' ? AuthColors.green : '#C0C0C0',
+                        }}
+                    >
+                        {language === 'english' && (
+                            <View
+                                className="w-[11px] h-[11px] rounded-full"
+                                style={{ backgroundColor: AuthColors.green }}
+                            />
+                        )}
+                    </View>
+                    <Text
+                        className="text-[15px]"
+                        style={{
+                            color: language === 'english' ? AuthColors.green : AuthColors.dark,
+                        }}
+                    >
+                        English
+                    </Text>
+                </TouchableOpacity>
+
+                {/* Bisaya */}
+                <TouchableOpacity
+                    onPress={() => setLanguage('bisaya')}
+                    className="flex-row items-center gap-2"
+                    activeOpacity={0.7}
+                >
+                    <View
+                        className="w-[22px] h-[22px] rounded-full border-2 items-center justify-center"
+                        style={{
+                            borderColor: language === 'bisaya' ? AuthColors.green : '#C0C0C0',
+                        }}
+                    >
+                        {language === 'bisaya' && (
+                            <View
+                                className="w-[11px] h-[11px] rounded-full"
+                                style={{ backgroundColor: AuthColors.green }}
+                            />
+                        )}
+                    </View>
+                    <Text
+                        className="text-[15px]"
+                        style={{
+                            color: language === 'bisaya' ? AuthColors.green : AuthColors.dark,
+                        }}
+                    >
+                        Bisaya
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
+            {/* ── Log Out ── */}
             <TouchableOpacity
                 onPress={logout}
-                style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 8,
-                    marginTop: 24,
-                    borderWidth: 1.5,
-                    borderColor: AuthColors.errorText,
-                    borderRadius: 50,
-                    height: 52,
-                }}
+                className="w-1/2 self-center flex-row items-center justify-center gap-2 border-[1.5px] rounded-full h-13"
+                style={{ borderColor: AuthColors.errorText, backgroundColor: '#FFF5F5' }}
                 activeOpacity={0.75}
             >
                 <LogOut size={20} color={AuthColors.errorText} />
-                <Text style={{ fontFamily: 'StackSans-Headline', fontSize: 16, color: AuthColors.errorText }}>
+                <Text
+                    className="text-base"
+                    style={{ color: AuthColors.errorText }}
+                >
                     Log Out
                 </Text>
             </TouchableOpacity>
-        </View>
+        </ScrollView>
     );
 }
 
-// ─── Root Screen ─────────────────────────────────────────────────────────────
+// ─── Root Screen ──────────────────────────────────────────────────────────────
 
 export default function ProfileScreen() {
     const { isLoggedIn, user } = useAuth();
     const insets = useSafeAreaInsets();
 
     return (
-        <View className="flex-1" style={{ backgroundColor: AuthColors.background, paddingTop: insets.top }}>
+        <View
+            className="flex-1"
+            style={{ backgroundColor: AuthColors.background, paddingTop: insets.top }}
+        >
             {isLoggedIn && user ? (
                 <>
-                    <View style={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 8 }}>
-                        <Text style={{ fontFamily: 'StackSans-Headline', fontSize: 24, color: AuthColors.dark }}>
-                            Profile
-                        </Text>
-                    </View>
                     <ProfileView user={user} />
                 </>
             ) : (
