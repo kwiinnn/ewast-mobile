@@ -527,7 +527,6 @@ function ReportForm({ isDesktop, onBack }: { isDesktop: boolean; onBack: () => v
                             style={{ opacity: submitting || !issueType ? 0.65 : 1 }}
                         >
                             <Text style={{
-                                fontFamily: 'PlusJakartaSans-ExtraBold',
                                 fontSize: 15,
                                 color: '#fff',
                                 letterSpacing: 1.5,
