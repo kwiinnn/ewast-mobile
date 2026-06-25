@@ -1,20 +1,19 @@
 import { useAuth } from '@/components/AuthContext';
+import { Camera, GeoJSONSource, Layer, Map as MapLibreMap } from '@maplibre/maplibre-react-native';
 import { useRouter } from 'expo-router';
-import { AlertTriangle, ChevronDown, MapPin, UserLock } from 'lucide-react-native';
+import { ChevronDown, UserLock } from 'lucide-react-native';
 import { useState } from 'react';
 import {
     Alert,
     Modal,
-    Platform,
     Pressable,
     ScrollView,
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Map as MapLibreMap, Camera, GeoJSONSource, Layer } from '@maplibre/maplibre-react-native';
 
 const ISSUE_TYPES = [
     'Drainage blockage',
@@ -135,8 +134,8 @@ export default function ReportScreen() {
                         >
                             <Camera
                                 initialViewState={{
-                                    centerCoordinate: coordinates,
-                                    zoomLevel: 15,
+                                    center: coordinates,
+                                    zoom: 15,
                                 }}
                             />
                             <GeoJSONSource
