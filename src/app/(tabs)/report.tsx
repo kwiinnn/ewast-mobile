@@ -2,6 +2,7 @@ import CalendarIcon from '@/assets/icons/calendar.svg';
 import LocationIcon from '@/assets/icons/location.svg';
 import { useAuth } from '@/components/AuthContext';
 import { BackButton } from '@/components/backbutton';
+import { t } from '@/constants/translations';
 import { Camera, GeoJSONSource, Layer, Map as MapLibreMap } from '@maplibre/maplibre-react-native';
 import { useRouter } from 'expo-router';
 import { ChevronDown, Plus, UserLock } from 'lucide-react-native';
@@ -50,7 +51,7 @@ const ANNOUNCEMENTS = [
 type Screen = 'home' | 'report';
 
 export default function ReportScreen() {
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, language } = useAuth();
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const [screen, setScreen] = useState<Screen>('home');
@@ -109,30 +110,9 @@ function HomeScreen({
     onReportPress: () => void;
     router: any;
 }) {
+    const { language } = useAuth();
     return (
         <View className="flex-1 bg-[#F0F4F1]" style={{ paddingTop: insets.top }}>
-            {/* Top bar */}
-            <View className="flex-row items-center justify-between px-5 py-3">
-                <View className="flex-row items-center" style={{ gap: 8 }}>
-                    <View className="bg-[#16A637] w-[34px] h-[34px] rounded-[8px] items-center justify-center">
-                        <Text className="text-white text-base">🗑</Text>
-                    </View>
-                    <Text className="text-[18px] font-extrabold text-[#233329] tracking-tight">EWAST</Text>
-                </View>
-                <View style={{ position: 'relative' }}>
-                    <TouchableOpacity
-                        className="bg-white w-[38px] h-[38px] rounded-full items-center justify-center"
-                        style={{ elevation: 2 }}
-                    >
-                        <Text className="text-base">🔔</Text>
-                    </TouchableOpacity>
-                    <View
-                        className="absolute bg-red-500 w-[10px] h-[10px] rounded-full border-2 border-[#F0F4F1]"
-                        style={{ top: 5, right: 5 }}
-                    />
-                </View>
-            </View>
-
             {/* Report an Issue banner */}
             <View className="px-5 pb-3">
                 <TouchableOpacity
@@ -144,7 +124,8 @@ function HomeScreen({
                     <View className="bg-[#16A637] w-[52px] h-[52px] rounded-[12px] items-center justify-center">
                         <Plus size={28} color="#fff" strokeWidth={2.5}/>
                     </View>
-                    <Text className="text-[17px] font-extrabold text-[#233329]">Report an Issue</Text>
+                    <Text className="text-[17px] font-extrabold text-[#233329]">{t('report.headline1', language)}{' '}</Text>
+
                 </TouchableOpacity>
             </View>
 
@@ -155,9 +136,9 @@ function HomeScreen({
                 contentContainerStyle={{ paddingBottom: 32 }}
             >
                 <View className="flex-row items-center justify-between mb-3">
-                    <Text className="text-[16px] font-extrabold text-[#233329]">Announcements</Text>
+                    <Text className="text-[16px] font-extrabold text-[#233329]">{t('report.announcements', language)}{' '}</Text>
                     <TouchableOpacity>
-                        <Text className="text-[13px] font-semibold text-[#16A637] underline">View All</Text>
+                        <Text className="text-[13px] font-semibold text-[#16A637] underline">{t('report.view', language)}{' '}</Text>
                     </TouchableOpacity>
                 </View>
                 {ANNOUNCEMENTS.map((ann) => (
@@ -170,6 +151,7 @@ function HomeScreen({
 
 // ── Announcement card ──────────────────────────────────────────────────────────
 function AnnouncementCard({ ann }: { ann: (typeof ANNOUNCEMENTS)[0] }) {
+    const { language } = useAuth();
     return (
         <View className="bg-white rounded-[16px] p-4 mb-3 border border-[#E5E7EB]" style={{ elevation: 1 }}>
             <Text className="text-[14px] font-extrabold text-[#16A637] mb-2">{ann.title}</Text>
@@ -188,7 +170,7 @@ function AnnouncementCard({ ann }: { ann: (typeof ANNOUNCEMENTS)[0] }) {
                 className="bg-[#16A637] rounded-full px-5 py-[7px] self-start"
                 activeOpacity={0.8}
             >
-                <Text className="text-white text-[11px] font-bold">Read More</Text>
+                <Text className="text-white text-[11px] font-bold">{t('report.read', language)}{' '}</Text>
             </TouchableOpacity>
         </View>
     );
@@ -196,6 +178,7 @@ function AnnouncementCard({ ann }: { ann: (typeof ANNOUNCEMENTS)[0] }) {
 
 // ── Report form ────────────────────────────────────────────────────────────────
 function ReportForm({ insets, onBack }: { insets: any; onBack: () => void }) {
+    const { language } = useAuth();
     const [location] = useState('Tupas Street, Matina Crossing, Davao City');
     const [coordinates, setCoordinates] = useState<[number, number]>([125.601, 7.065]);
     const [issueType, setIssueType] = useState('');
@@ -225,11 +208,11 @@ function ReportForm({ insets, onBack }: { insets: any; onBack: () => void }) {
             >
                 <View className="px-5 pt-4 pb-5 bg-[#F8F9FA]">
                     <BackButton />
-                    <Text className="text-[28px] font-extrabold text-[#233329]">Report Details</Text>
+                    <Text className="text-[28px] font-extrabold text-[#233329]">{t('report.details', language)}{' '}</Text>
                 </View>
 
                 <View className="flex-1 bg-[#F0F4F1] px-5 pt-6" style={{ minHeight: 500 }}>
-                    <Text className="text-[15px] font-extrabold text-[#233329] mb-3">Location</Text>
+                    <Text className="text-[15px] font-extrabold text-[#233329] mb-3">{t('report.location', language)}{' '}</Text>
                     <View style={{ height: 200, borderRadius: 16, overflow: 'hidden', marginBottom: 12 }}>
                         <MapLibreMap
                             style={{ flex: 1 }}
@@ -269,21 +252,21 @@ function ReportForm({ insets, onBack }: { insets: any; onBack: () => void }) {
                         <Text className="text-[#233329] text-sm">{location}</Text>
                     </View>
 
-                    <Text className="text-[15px] font-extrabold text-[#233329] mb-3">Type of Report</Text>
+                    <Text className="text-[15px] font-extrabold text-[#233329] mb-3">{t('report.type', language)}{' '}</Text>
                     <TouchableOpacity
                         className="bg-white border border-[#E5E7EB] rounded-[12px] px-4 h-[48px] flex-row items-center justify-between mb-6"
                         onPress={() => setDropdownOpen(true)}
                     >
                         <Text className={issueType ? 'text-[#233329] text-sm' : 'text-[#8F9BB3] text-sm'}>
-                            {issueType || 'Select issue type...'}
+                            {issueType || t('report.select', language)}
                         </Text>
                         <ChevronDown size={18} color="#8F9BB3" />
                     </TouchableOpacity>
 
-                    <Text className="text-[15px] font-extrabold text-[#233329] mb-3">Description</Text>
+                    <Text className="text-[15px] font-extrabold text-[#233329] mb-3">{t('report.description', language)}{' '}</Text>
                     <TextInput
                         className="bg-white border border-[#E5E7EB] rounded-[12px] px-4 pt-4 pb-4 text-sm text-[#233329] mb-6"
-                        placeholder="Describe the issue..."
+                        placeholder={t('report.describe', language)}
                         placeholderTextColor="#8F9BB3"
                         multiline
                         numberOfLines={6}
@@ -293,9 +276,7 @@ function ReportForm({ insets, onBack }: { insets: any; onBack: () => void }) {
                     />
 
                     <Text className="text-[11px] text-[#8F9BB3] leading-[18px] mb-5">
-                        By submitting this form, you consent to the collection, processing, and storage of
-                        your report solely for the purposes of recording and analysis by CENRO in accordance
-                        with the Data Privacy Act of 2012 (Republic Act No. 10173).
+                        {t('report.note', language)}{' '}
                     </Text>
 
                     <TouchableOpacity
@@ -305,7 +286,7 @@ function ReportForm({ insets, onBack }: { insets: any; onBack: () => void }) {
                         style={{ opacity: submitting ? 0.7 : 1 }}
                     >
                         <Text style={{ fontSize: 15, color: '#fff', letterSpacing: 1.5, fontWeight: '800' }}>
-                            {submitting ? 'SUBMITTING...' : 'SUBMIT REPORT'}
+                            {submitting ? t('report.submitting', language) : t('report.submit', language)}
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -314,7 +295,7 @@ function ReportForm({ insets, onBack }: { insets: any; onBack: () => void }) {
             <Modal visible={dropdownOpen} transparent animationType="fade" onRequestClose={() => setDropdownOpen(false)}>
                 <Pressable className="flex-1 bg-black/40" onPress={() => setDropdownOpen(false)}>
                     <View className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[24px] px-5 pt-4 pb-8">
-                        <Text className="text-[16px] font-extrabold text-[#233329] mb-4">Select Issue Type</Text>
+                        <Text className="text-[16px] font-extrabold text-[#233329] mb-4">{t('report.type', language)}{' '}</Text>
                         {ISSUE_TYPES.map((type) => (
                             <TouchableOpacity
                                 key={type}

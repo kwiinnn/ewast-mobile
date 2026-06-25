@@ -1,5 +1,6 @@
 import { useAuth } from '@/components/AuthContext';
 import { AuthColors } from '@/constants/auth-colors';
+import { t } from '@/constants/translations';
 import { useRouter } from 'expo-router';
 import { CalendarDays, Clock, Map as MapIcon, Search, Truck } from 'lucide-react-native';
 import { ScrollView, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
@@ -7,7 +8,7 @@ import { ScrollView, Text, TextInput, TouchableOpacity, useWindowDimensions, Vie
 const DESKTOP_BREAKPOINT = 768;
 
 export default function HomeScreen() {
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, language } = useAuth();
     const router = useRouter();
     const { width } = useWindowDimensions();
     const isDesktop = width >= DESKTOP_BREAKPOINT;
@@ -32,26 +33,26 @@ export default function HomeScreen() {
                         className="font-extrabold text-center text-[#233329]"
                         style={{ fontSize: isDesktop ? 26 : 24, marginBottom: 2 }}
                     >
-                        Be Part of the{' '}
-                        <Text className="text-[#16A637]">Local</Text>
+                        {t('home.guest.headline1', language)}{' '}
+                        <Text className="text-[#16A637]">{t('home.guest.headline2', language)}</Text>
                     </Text>
                     <Text
                         className="font-extrabold text-center text-[#16A637]"
                         style={{ fontSize: isDesktop ? 26 : 24, marginBottom: isDesktop ? 14 : 12 }}
                     >
-                        Waste Collection
+                        {t('home.guest.headline3', language)}
                     </Text>
                     <View className="items-center mt-5" style={{ marginBottom: isDesktop ? 24 : 20 }}>
                         <Text
                             className="text-center text-[#8F9BB3] leading-5 font-medium"
                             style={{ fontSize: isDesktop ? 14 : 13, paddingHorizontal: 8 }}
                         >
-                            Get information about garbage collection and report scattered garbage around your area.{' '}
+                            {t('home.guest.subtitle', language)}{' '}
                             <Text
                                 style={{ color: AuthColors.green, fontSize: isDesktop ? 14 : 13 }}
                                 onPress={() => router.push('/login')}
                             >
-                                Login now!
+                                {t('home.guest.login', language)}
                             </Text>
                         </Text>
                     </View>
@@ -62,8 +63,8 @@ export default function HomeScreen() {
                             style={{ height: isDesktop ? 46 : 44 }}
                             onPress={() => navigateTo('/schedules')}
                         >
-                            <Text className="text-white font-extrabold tracking-widest" style={{ fontSize: 11 }}>
-                                SCHEDULES
+                            <Text className="text-white font-extrabold tracking-widest uppercase" style={{ fontSize: 11 }}>
+                                {t('home.guest.schedules', language)}
                             </Text>
                         </TouchableOpacity>
 
@@ -72,8 +73,8 @@ export default function HomeScreen() {
                             style={{ height: isDesktop ? 46 : 44 }}
                             onPress={() => navigateTo('/data')}
                         >
-                            <Text className="text-white font-extrabold tracking-widest" style={{ fontSize: 11 }}>
-                                DATA
+                            <Text className="text-white font-extrabold tracking-widest uppercase" style={{ fontSize: 11 }}>
+                                {t('home.guest.data', language)}
                             </Text>
                         </TouchableOpacity>
 
@@ -82,8 +83,8 @@ export default function HomeScreen() {
                             style={{ height: isDesktop ? 46 : 44 }}
                             onPress={() => navigateTo('/report')}
                         >
-                            <Text className="text-white font-extrabold tracking-widest" style={{ fontSize: 11 }}>
-                                REPORT
+                            <Text className="text-white font-extrabold tracking-widest uppercase" style={{ fontSize: 11 }}>
+                                {t('home.guest.report', language)}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -92,7 +93,7 @@ export default function HomeScreen() {
         );
     }
 
-    // ── Logged-in view (unchanged) ───────────────────────────────────────────────
+    // ── Logged-in view ───────────────────────────────────────────────────────────
     return (
         <>
             {isDesktop ? (
@@ -102,18 +103,19 @@ export default function HomeScreen() {
                         style={{ width: 460, paddingHorizontal: 40, paddingVertical: 28, elevation: 2 }}
                     >
                         <Text className="text-[26px] font-extrabold text-center text-[#233329]">
-                            Track Your Local
+                            {t('home.track.headline1', language)}
                         </Text>
                         <Text className="text-[26px] font-extrabold text-center text-[#233329] mb-3">
-                            Waste <Text className="text-[#16A637]">Collection</Text>
+                            {t('home.track.headline2', language)}{' '}
+                            <Text className="text-[#16A637]">{t('home.track.headline3', language)}</Text>
                         </Text>
                         <Text className="text-center text-[#8F9BB3] text-sm mb-5 px-4 leading-5 font-medium">
-                            Stay updated with live garbage truck locations and collection schedules
+                            {t('home.track.subtitle', language)}
                         </Text>
                         <View className="flex-row items-center border-[1.5px] border-[#D1D5DB] rounded-full px-5 h-[46px] mb-5 bg-white">
                             <TextInput
                                 className="flex-1 text-[#233329] font-medium text-sm"
-                                placeholder="Search Location"
+                                placeholder={t('home.track.search', language)}
                                 placeholderTextColor="#8F9BB3"
                             />
                             <Search size={20} color="#233329" />
@@ -130,7 +132,7 @@ export default function HomeScreen() {
                         </View>
                         <TouchableOpacity className="bg-[#16A637] rounded-full h-[48px] flex-row items-center justify-center mb-6 mx-4">
                             <View className="w-2 h-2 bg-white rounded-full mr-2" />
-                            <Text className="text-white font-bold text-sm">Track Live</Text>
+                            <Text className="text-white font-bold text-sm">{t('home.track.live', language)}</Text>
                         </TouchableOpacity>
                         <View className="flex-row justify-center gap-8">
                             <View className="items-center">
@@ -140,7 +142,7 @@ export default function HomeScreen() {
                                 >
                                     <CalendarDays size={30} color="#FFFFFF" />
                                 </TouchableOpacity>
-                                <Text className="text-[#233329] font-medium text-sm">Schedules</Text>
+                                <Text className="text-[#233329] font-medium text-sm">{t('home.track.schedules', language)}</Text>
                             </View>
                             <View className="items-center">
                                 <TouchableOpacity
@@ -149,7 +151,7 @@ export default function HomeScreen() {
                                 >
                                     <MapIcon size={30} color="#FFFFFF" />
                                 </TouchableOpacity>
-                                <Text className="text-[#233329] font-medium text-sm">Heatmap</Text>
+                                <Text className="text-[#233329] font-medium text-sm">{t('home.track.heatmap', language)}</Text>
                             </View>
                         </View>
                     </View>
@@ -162,18 +164,19 @@ export default function HomeScreen() {
                 >
                     <View className="bg-white rounded-[32px] px-6 pt-10 pb-10 shadow-sm mt-6" style={{ elevation: 2 }}>
                         <Text className="text-[28px] font-extrabold text-center text-[#233329] mb-1">
-                            Track Your Local
+                            {t('home.track.headline1', language)}
                         </Text>
                         <Text className="text-[28px] font-extrabold text-center text-[#233329] mb-4">
-                            Waste <Text className="text-[#16A637]">Collection</Text>
+                            {t('home.track.headline2', language)}{' '}
+                            <Text className="text-[#16A637]">{t('home.track.headline3', language)}</Text>
                         </Text>
                         <Text className="text-center text-[#8F9BB3] text-sm mb-8 px-2 leading-5 font-medium">
-                            Stay updated with live garbage truck locations and collection schedules
+                            {t('home.track.subtitle', language)}
                         </Text>
                         <View className="flex-row items-center border-[1.5px] border-[#233329] rounded-full px-5 h-[52px] mb-8 bg-[#F0F4F1]">
                             <TextInput
                                 className="flex-1 text-[#233329] font-medium text-base"
-                                placeholder="Search Location"
+                                placeholder={t('home.track.search', language)}
                                 placeholderTextColor="#8F9BB3"
                             />
                             <Search size={22} color="#233329" />
@@ -190,20 +193,20 @@ export default function HomeScreen() {
                         </View>
                         <TouchableOpacity className="bg-[#16A637] rounded-full h-[52px] flex-row items-center justify-center mb-8 mx-6">
                             <View className="w-2.5 h-2.5 bg-white rounded-full mr-2.5" />
-                            <Text className="text-white font-bold text-base">Track Live</Text>
+                            <Text className="text-white font-bold text-base">{t('home.track.live', language)}</Text>
                         </TouchableOpacity>
                         <View className="flex-row justify-center gap-10 mt-2">
                             <View className="items-center">
                                 <TouchableOpacity className="bg-[#233329] w-[76px] h-[76px] rounded-[24px] items-center justify-center mb-3 shadow-sm">
                                     <CalendarDays size={34} color="#FFFFFF" />
                                 </TouchableOpacity>
-                                <Text className="text-[#233329] font-medium text-base">Schedules</Text>
+                                <Text className="text-[#233329] font-medium text-base">{t('home.track.schedules', language)}</Text>
                             </View>
                             <View className="items-center">
                                 <TouchableOpacity className="bg-[#233329] w-[76px] h-[76px] rounded-[24px] items-center justify-center mb-3 shadow-sm">
                                     <MapIcon size={34} color="#FFFFFF" />
                                 </TouchableOpacity>
-                                <Text className="text-[#233329] font-medium text-base">Heatmap</Text>
+                                <Text className="text-[#233329] font-medium text-base">{t('home.track.heatmap', language)}</Text>
                             </View>
                         </View>
                     </View>

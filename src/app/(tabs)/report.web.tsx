@@ -1,4 +1,5 @@
 import { useAuth } from '@/components/AuthContext';
+import { t } from '@/constants/translations';
 import { useRouter } from 'expo-router';
 import { AlertTriangle, ChevronDown, Plus, UserLock } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
@@ -156,6 +157,7 @@ function LoggedOutGate({ isDesktop, router }: { isDesktop: boolean; router: any 
 
 // ── Home screen ────────────────────────────────────────────────────────────────
 function HomeScreen({ isDesktop, onReportPress }: { isDesktop: boolean; onReportPress: () => void }) {
+    const { language } = useAuth();
     return (
         <ScrollView
             className="flex-1 bg-[#F0F4F1]"
@@ -208,11 +210,11 @@ function HomeScreen({ isDesktop, onReportPress }: { isDesktop: boolean; onReport
                                     color: '#233329',
                                 }}
                             >
-                                Report an Issue
+                                {t('report.headline1', language)}{' '}
                             </Text>
                             {isDesktop && (
                                 <Text style={{ fontSize: 13, color: '#8F9BB3', marginTop: 2 }}>
-                                    Tap to submit a new garbage report in your area
+                                    {t('report.headline2', language)}{' '}
                                 </Text>
                             )}
                         </View>
@@ -225,7 +227,7 @@ function HomeScreen({ isDesktop, onReportPress }: { isDesktop: boolean; onReport
                                     paddingVertical: 10,
                                 }}
                             >
-                                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Report Now</Text>
+                                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>{t('report.button1', language)}{' '}</Text>
                             </View>
                         )}
                     </TouchableOpacity>
@@ -237,11 +239,11 @@ function HomeScreen({ isDesktop, onReportPress }: { isDesktop: boolean; onReport
                         <Text
                             style={{ fontSize: isDesktop ? 18 : 16, fontWeight: '800', color: '#233329' }}
                         >
-                            Announcements
+                            {t('report.announcements', language)}{' '}
                         </Text>
                         <TouchableOpacity>
                             <Text style={{ fontSize: 13, fontWeight: '600', color: '#16A637', textDecorationLine: 'underline' }}>
-                                View All
+                                {t('report.view', language)}{' '}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -277,6 +279,7 @@ function AnnouncementCard({
     ann: (typeof ANNOUNCEMENTS)[0];
     isDesktop: boolean;
 }) {
+    const { language } = useAuth();
     return (
         <View
             style={{
@@ -315,7 +318,7 @@ function AnnouncementCard({
                 }}
                 activeOpacity={0.8}
             >
-                <Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>Read More</Text>
+                <Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>{t('report.read', language)}{' '}</Text>
             </TouchableOpacity>
         </View>
     );
@@ -323,6 +326,7 @@ function AnnouncementCard({
 
 // ── Report form ────────────────────────────────────────────────────────────────
 function ReportForm({ isDesktop, onBack }: { isDesktop: boolean; onBack: () => void }) {
+    const { language } = useAuth();
     const [location] = useState('Tupas Street, Matina Crossing, Davao City');
     const [coordinates, setCoordinates] = useState<[number, number]>(DAVAO);
     const [issueType, setIssueType] = useState('');
@@ -364,7 +368,7 @@ function ReportForm({ isDesktop, onBack }: { isDesktop: boolean; onBack: () => v
                             style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 16, alignSelf: 'flex-start' }}
                             onPress={onBack}
                         >
-                            <Text style={{ fontSize: 13, color: '#16A637', fontWeight: '700' }}>← Back to Dashboard</Text>
+                            <Text style={{ fontSize: 13, color: '#16A637', fontWeight: '700' }}>{t('report.return', language)}{' '}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -382,9 +386,9 @@ function ReportForm({ isDesktop, onBack }: { isDesktop: boolean; onBack: () => v
                             style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 16, alignSelf: 'flex-start' }}
                             onPress={onBack}
                         >
-                            <Text style={{ fontSize: 13, color: '#16A637', fontWeight: '700' }}>← Back to Dashboard</Text>
+                            <Text style={{ fontSize: 13, color: '#16A637', fontWeight: '700' }}>{t('report.return', language)}{' '}</Text>
                         </TouchableOpacity>
-                        <Text className="text-[28px] font-extrabold text-[#233329]">Report Details</Text>
+                        <Text className="text-[28px] font-extrabold text-[#233329]">{t('report.details', language)}{' '}</Text>
                     </View>
                 )}
 
@@ -411,13 +415,13 @@ function ReportForm({ isDesktop, onBack }: { isDesktop: boolean; onBack: () => v
                             style={{ gap: 10 }}
                         >
                             <AlertTriangle size={18} color="#16A637" />
-                            <Text className="text-[#16A637] font-bold text-sm">Report submitted successfully!</Text>
+                            <Text className="text-[#16A637] font-bold text-sm">{t('report.location', language)}{' '}</Text>
                         </View>
                     )}
 
                     <View style={{ paddingHorizontal: isDesktop ? 0 : 20, overflow: 'visible' }}>
                         {/* Location */}
-                        <Text className="text-[15px] font-extrabold text-[#233329] mb-3">Location</Text>
+                        <Text className="text-[15px] font-extrabold text-[#233329] mb-3">{t('report.location', language)}{' '}</Text>
                         <View style={{ height: 200, borderRadius: 16, overflow: 'hidden', marginBottom: 12 }}>
                             <WebMap coordinates={coordinates} onCoordinatesChange={setCoordinates} />
                         </View>
@@ -426,7 +430,7 @@ function ReportForm({ isDesktop, onBack }: { isDesktop: boolean; onBack: () => v
                         </View>
 
                         {/* Type of Report */}
-                        <Text className="text-[15px] font-extrabold text-[#233329] mb-3">Type of Report</Text>
+                        <Text className="text-[15px] font-extrabold text-[#233329] mb-3">{t('report.type', language)}{' '}</Text>
                         <View style={{ position: 'relative', zIndex: 10, overflow: 'visible', marginBottom: 24 }}>
                             {dropdownOpen && (
                                 <View
@@ -492,7 +496,7 @@ function ReportForm({ isDesktop, onBack }: { isDesktop: boolean; onBack: () => v
                                 onPress={() => setDropdownOpen(!dropdownOpen)}
                             >
                                 <Text style={{ fontSize: 14, color: issueType ? '#233329' : '#8F9BB3' }}>
-                                    {issueType || 'Select issue type...'}
+                                    {issueType || t('report.select', language)}
                                 </Text>
                                 <ChevronDown
                                     size={18}
@@ -503,10 +507,10 @@ function ReportForm({ isDesktop, onBack }: { isDesktop: boolean; onBack: () => v
                         </View>
 
                         {/* Description */}
-                        <Text className="text-[15px] font-extrabold text-[#233329] mb-3">Description</Text>
+                        <Text className="text-[15px] font-extrabold text-[#233329] mb-3">{t('report.description', language)}{' '}</Text>
                         <TextInput
                             className="bg-white border border-[#E5E7EB] rounded-[12px] px-4 pt-4 text-sm text-[#233329] mb-6"
-                            placeholder="Describe the issue..."
+                            placeholder={t('report.describe', language)}
                             placeholderTextColor="#8F9BB3"
                             multiline
                             style={{ height: 160, textAlignVertical: 'top' } as any}
@@ -516,7 +520,7 @@ function ReportForm({ isDesktop, onBack }: { isDesktop: boolean; onBack: () => v
 
                         {/* Consent */}
                         <Text className="text-[11px] text-[#8F9BB3] leading-[18px] mb-6">
-                            By submitting this form, you consent to the collection, processing, and storage of your report solely for the purposes of recording and analysis by CENRO in accordance with the Data Privacy Act of 2012 (Republic Act No. 10173).
+                            {t('report.note', language)}{' '}
                         </Text>
 
                         {/* Submit */}
@@ -532,7 +536,7 @@ function ReportForm({ isDesktop, onBack }: { isDesktop: boolean; onBack: () => v
                                 letterSpacing: 1.5,
                                 fontWeight: '800',
                             }}>
-                                {submitting ? 'SUBMITTING...' : 'SUBMIT REPORT'}
+                                {submitting ? t('report.submitting', language) : t('report.submit', language)}
                             </Text>
                         </TouchableOpacity>
                     </View>
