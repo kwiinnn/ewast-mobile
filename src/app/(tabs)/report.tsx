@@ -1,7 +1,10 @@
+import CalendarIcon from '@/assets/icons/calendar.svg';
+import LocationIcon from '@/assets/icons/location.svg';
 import { useAuth } from '@/components/AuthContext';
+import { BackButton } from '@/components/backbutton';
 import { Camera, GeoJSONSource, Layer, Map as MapLibreMap } from '@maplibre/maplibre-react-native';
 import { useRouter } from 'expo-router';
-import { ChevronDown, UserLock } from 'lucide-react-native';
+import { ChevronDown, Plus, UserLock } from 'lucide-react-native';
 import { useState } from 'react';
 import {
     Alert,
@@ -139,7 +142,7 @@ function HomeScreen({
                     activeOpacity={0.75}
                 >
                     <View className="bg-[#16A637] w-[52px] h-[52px] rounded-[12px] items-center justify-center">
-                        <PlusIcon width={28} height={28} color="#fff" />
+                        <Plus size={28} color="#fff" strokeWidth={2.5}/>
                     </View>
                     <Text className="text-[17px] font-extrabold text-[#233329]">Report an Issue</Text>
                 </TouchableOpacity>
@@ -185,7 +188,7 @@ function AnnouncementCard({ ann }: { ann: (typeof ANNOUNCEMENTS)[0] }) {
                 className="bg-[#16A637] rounded-full px-5 py-[7px] self-start"
                 activeOpacity={0.8}
             >
-                <Text className="text-white text-[11px] font-bold">View Location</Text>
+                <Text className="text-white text-[11px] font-bold">Read More</Text>
             </TouchableOpacity>
         </View>
     );
@@ -215,21 +218,13 @@ function ReportForm({ insets, onBack }: { insets: any; onBack: () => void }) {
 
     return (
         <View className="flex-1 bg-[#F8F9FA]" style={{ paddingTop: insets.top }}>
-            {/* Header */}
-            <View className="flex-row items-center px-5 py-4 bg-[#F8F9FA]" style={{ gap: 12 }}>
-                <BackButton />
-                <View className="flex-1 bg-white border border-[#E5E7EB] rounded-full px-5 h-11 justify-center">
-                    <Text className="text-[10px] text-[#8F9BB3] font-bold tracking-widest">CURRENT TAB</Text>
-                    <Text className="text-[13px] font-extrabold text-[#233329]">Report Garbage</Text>
-                </View>
-            </View>
-
             <ScrollView
                 className="flex-1 bg-[#F8F9FA]"
                 contentContainerStyle={{ paddingBottom: 120 }}
                 showsVerticalScrollIndicator={false}
             >
                 <View className="px-5 pt-4 pb-5 bg-[#F8F9FA]">
+                    <BackButton />
                     <Text className="text-[28px] font-extrabold text-[#233329]">Report Details</Text>
                 </View>
 

@@ -1,5 +1,4 @@
 import { useAuth } from '@/components/AuthContext';
-import { BackButton } from '@/components/backbutton';
 import { useRouter } from 'expo-router';
 import { AlertTriangle, ChevronDown, Plus, UserLock } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
@@ -316,7 +315,7 @@ function AnnouncementCard({
                 }}
                 activeOpacity={0.8}
             >
-                <Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>View Location</Text>
+                <Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>Read More</Text>
             </TouchableOpacity>
         </View>
     );
@@ -361,11 +360,12 @@ function ReportForm({ isDesktop, onBack }: { isDesktop: boolean; onBack: () => v
                 {/* Mobile heading with back button */}
                 {!isDesktop && (
                     <View className="flex-row items-center px-5 py-4 bg-[#F8F9FA]" style={{ gap: 12 }}>
-                        <BackButton />
-                        <View className="flex-1 bg-white border border-[#E5E7EB] rounded-full px-5 h-11 justify-center">
-                            <Text className="text-[10px] text-[#8F9BB3] font-bold tracking-widest">CURRENT TAB</Text>
-                            <Text className="text-[13px] font-extrabold text-[#233329]">Report Garbage</Text>
-                        </View>
+                        <TouchableOpacity
+                            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 16, alignSelf: 'flex-start' }}
+                            onPress={onBack}
+                        >
+                            <Text style={{ fontSize: 13, color: '#16A637', fontWeight: '700' }}>← Back to Dashboard</Text>
+                        </TouchableOpacity>
                     </View>
                 )}
 
