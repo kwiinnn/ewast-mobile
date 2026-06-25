@@ -1,4 +1,5 @@
 import { useAuth } from '@/components/AuthContext';
+import { AuthColors } from '@/constants/auth-colors';
 import { useRouter } from 'expo-router';
 import { CalendarDays, Clock, Map as MapIcon, Search, Truck } from 'lucide-react-native';
 import { ScrollView, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
@@ -9,15 +10,92 @@ export default function HomeScreen() {
     const { isLoggedIn } = useAuth();
     const router = useRouter();
     const { width } = useWindowDimensions();
-
     const isDesktop = width >= DESKTOP_BREAKPOINT;
 
     const navigateTo = (path: string) => router.push(path as any);
 
+    // ── Guest view ──────────────────────────────────────────────────────────────
+    if (!isLoggedIn) {
+        return (
+            <View className="flex-1 items-center justify-center bg-[#F0F4F1]">
+                <View
+                    className="bg-white rounded-[28px] shadow-sm"
+                    style={{
+                        width: isDesktop ? 460 : '100%',
+                        marginHorizontal: isDesktop ? 0 : 24,
+                        paddingHorizontal: isDesktop ? 40 : 24,
+                        paddingVertical: isDesktop ? 40 : 32,
+                        elevation: 2,
+                    }}
+                >
+                    <Text
+                        className="font-extrabold text-center text-[#233329]"
+                        style={{ fontSize: isDesktop ? 26 : 24, marginBottom: 2 }}
+                    >
+                        Be Part of the{' '}
+                        <Text className="text-[#16A637]">Local</Text>
+                    </Text>
+                    <Text
+                        className="font-extrabold text-center text-[#16A637]"
+                        style={{ fontSize: isDesktop ? 26 : 24, marginBottom: isDesktop ? 14 : 12 }}
+                    >
+                        Waste Collection
+                    </Text>
+                    <View className="items-center mt-5" style={{ marginBottom: isDesktop ? 24 : 20 }}>
+                        <Text
+                            className="text-center text-[#8F9BB3] leading-5 font-medium"
+                            style={{ fontSize: isDesktop ? 14 : 13, paddingHorizontal: 8 }}
+                        >
+                            Get information about garbage collection and report scattered garbage around your area.{' '}
+                            <Text
+                                style={{ color: AuthColors.green, fontSize: isDesktop ? 14 : 13 }}
+                                onPress={() => router.push('/login')}
+                            >
+                                Login now!
+                            </Text>
+                        </Text>
+                    </View>
+                    {/* CTA Buttons */}
+                    <View className="flex-row justify-between" style={{ gap: 10 }}>
+                        <TouchableOpacity
+                            className="flex-1 bg-[#16A637] rounded-full items-center justify-center"
+                            style={{ height: isDesktop ? 46 : 44 }}
+                            onPress={() => navigateTo('/schedules')}
+                        >
+                            <Text className="text-white font-extrabold tracking-widest" style={{ fontSize: 11 }}>
+                                SCHEDULES
+                            </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            className="flex-1 bg-[#16A637] rounded-full items-center justify-center"
+                            style={{ height: isDesktop ? 46 : 44 }}
+                            onPress={() => navigateTo('/data')}
+                        >
+                            <Text className="text-white font-extrabold tracking-widest" style={{ fontSize: 11 }}>
+                                DATA
+                            </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            className="flex-1 bg-[#16A637] rounded-full items-center justify-center"
+                            style={{ height: isDesktop ? 46 : 44 }}
+                            onPress={() => navigateTo('/report')}
+                        >
+                            <Text className="text-white font-extrabold tracking-widest" style={{ fontSize: 11 }}>
+                                REPORT
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+        );
+    }
+
+    // ── Logged-in view (unchanged) ───────────────────────────────────────────────
     return (
         <>
             {isDesktop ? (
-                /* Desktop: card vertically centred, no scroll */
                 <View className="flex-1 items-center justify-center bg-[#F0F4F1]">
                     <View
                         className="bg-white rounded-[28px] shadow-sm"
@@ -77,7 +155,6 @@ export default function HomeScreen() {
                     </View>
                 </View>
             ) : (
-                /* Mobile: scrollable card */
                 <ScrollView
                     className="flex-1 bg-[#F0F4F1]"
                     contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 140 }}
