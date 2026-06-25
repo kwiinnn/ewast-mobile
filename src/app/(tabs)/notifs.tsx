@@ -1,5 +1,6 @@
 import { useAuth } from '@/components/AuthContext';
 import { AuthColors } from '@/constants/auth-colors';
+import { t } from '@/constants/translations';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
     CheckCircle2,
@@ -61,19 +62,19 @@ const MOCK_NOTIFICATIONS: ReportNotification[] = [
     },
 ];
 
-const FILTERS = [
-    { key: 'resolved', label: 'Resolved' },
-    { key: 'pending', label: 'Pending' },
-    { key: 'all', label: 'All' },
-] as const;
-
-type FilterKey = (typeof FILTERS)[number]['key'];
+type FilterKey = 'resolved' | 'pending' | 'all';
 
 export default function NotificationsScreen() {
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, language } = useAuth();
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const { filter: filterParam } = useLocalSearchParams<{ filter?: string }>();
+
+    const FILTERS = [
+        { key: 'resolved' as FilterKey, label: t('profile.resolved', language) },
+        { key: 'pending' as FilterKey, label: t('profile.pending', language) },
+        { key: 'all' as FilterKey, label: t('profile.all', language) },
+    ];
 
     const validFilters: FilterKey[] = ['resolved', 'pending', 'all'];
     const resolvedParam: FilterKey =
@@ -148,10 +149,10 @@ export default function NotificationsScreen() {
                 {/* Heading */}
                 <View className="px-5 pt-4 pb-5" style={{ backgroundColor: AuthColors.background }}>
                     <Text className="text-[28px] font-extrabold" style={{ color: AuthColors.dark }}>
-                        Notifications
+                        {t('notif.head', language)}{' '}
                     </Text>
                     <Text className="text-sm mt-1" style={{ color: AuthColors.placeholder }}>
-                        Updates on the reports you've submitted
+                        {t('notif.subhead', language)}{' '}
                     </Text>
                 </View>
 

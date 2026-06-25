@@ -1,3 +1,4 @@
+import { t } from '@/constants/translations';
 import { router } from 'expo-router';
 import { LogOut } from 'lucide-react-native';
 import { useState } from 'react';
@@ -61,7 +62,7 @@ function GuestView() {
 function BarangayDropdown() {
     const [selected, setSelected] = useState<string | null>(null);
     const [open, setOpen] = useState(false);
-
+    const { language } = useAuth();
     return (
         <>
             <TouchableOpacity
@@ -75,7 +76,7 @@ function BarangayDropdown() {
                     style={{ color: selected ? AuthColors.dark : AuthColors.placeholder }}
                     numberOfLines={1}
                 >
-                    {selected ?? 'Search Location'}
+                    {selected ?? t('profile.select', language)}
                 </Text>
                 <Text className="text-xs" style={{ color: AuthColors.placeholder }}>▾</Text>
             </TouchableOpacity>
@@ -135,8 +136,7 @@ function BarangayDropdown() {
 // ─── Profile View ─────────────────────────────────────────────────────────────
 
 function ProfileView({ user }: { user: User }) {
-    const { logout } = useAuth();
-    const [language, setLanguage] = useState<'english' | 'bisaya'>('english');
+    const { logout, language, setLanguage } = useAuth();
 
     return (
         <ScrollView
@@ -198,7 +198,7 @@ function ProfileView({ user }: { user: User }) {
                             className="text-xs"
                             style={{ color: AuthColors.dark }}
                         >
-                            Reports
+                            {t('profile.reports', language)}{' '}
                         </Text>
                     </TouchableOpacity>
 
@@ -219,7 +219,7 @@ function ProfileView({ user }: { user: User }) {
                             className="text-xs"
                             style={{ color: AuthColors.dark }}
                         >
-                            Resolved
+                            {t('profile.resolved', language)}{' '}
                         </Text>
                     </TouchableOpacity>
 
@@ -240,7 +240,7 @@ function ProfileView({ user }: { user: User }) {
                             className="text-xs"
                             style={{ color: AuthColors.dark }}
                         >
-                            Pending
+                            {t('profile.pending', language)}{' '}
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -277,7 +277,7 @@ function ProfileView({ user }: { user: User }) {
                 className="font-bold text-[16px] tracking-widest mb-2.5"
                 style={{ color: AuthColors.green }}
             >
-                LANGUAGE
+                {t('profile.language', language)}{' '}
             </Text>
 
             <View
