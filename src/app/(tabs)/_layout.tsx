@@ -26,7 +26,7 @@ function WebHeader() {
             {/* Desktop Nav Bar (admin side) */}
             {isDesktop && isAdmin && (
                 <View
-                    className="flex-row items-center justify-between bg-[#F0F4F1] px-10"
+          className="flex-row items-center justify-between bg-[#F0F4F1] px-10 border border-[#DAD0D0]"
                     style={{ height: 64 }}
                 >
                     <TouchableOpacity
