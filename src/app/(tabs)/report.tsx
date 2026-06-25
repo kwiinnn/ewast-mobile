@@ -309,7 +309,7 @@ function ReportForm({ insets, onBack }: { insets: any; onBack: () => void }) {
                         disabled={submitting}
                         style={{ opacity: submitting ? 0.7 : 1 }}
                     >
-                        <Text style={{ fontFamily: 'PlusJakartaSans-ExtraBold', fontSize: 15, color: '#fff', letterSpacing: 1.5, fontWeight: '800' }}>
+                        <Text style={{ fontSize: 15, color: '#fff', letterSpacing: 1.5, fontWeight: '800' }}>
                             {submitting ? 'SUBMITTING...' : 'SUBMIT REPORT'}
                         </Text>
                     </TouchableOpacity>
