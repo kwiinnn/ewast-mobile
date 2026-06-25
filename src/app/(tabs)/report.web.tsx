@@ -1,6 +1,7 @@
 import { useAuth } from '@/components/AuthContext';
+import { BackButton } from '@/components/backbutton';
 import { useRouter } from 'expo-router';
-import { AlertTriangle, ChevronDown, UserLock } from 'lucide-react-native';
+import { AlertTriangle, ChevronDown, Plus, UserLock } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import {
     ScrollView,
@@ -10,6 +11,9 @@ import {
     useWindowDimensions,
     View,
 } from 'react-native';
+
+import CalendarIcon from '@/assets/icons/calendar.svg';
+import LocationIcon from '@/assets/icons/location.svg';
 
 const ISSUE_TYPES = [
     'Drainage blockage',
@@ -23,11 +27,29 @@ const ISSUE_TYPES = [
     'Illegal dumping',
 ];
 
+const ANNOUNCEMENTS = [
+    {
+        id: '1',
+        title: 'Littering in Water Bodies',
+        district: 'Talomo',
+        date: '06/24/2026',
+        body: 'Cleanup Drive on June 26, 2024. Located at MacArthur Highway, Kissea Village, Ulas, Talomo Proper, Talomo District, Davao City, Davao Region, 8023, Philippines',
+    },
+    {
+        id: '2',
+        title: 'Littering in Water Bodies',
+        district: 'Talomo',
+        date: '06/24/2026',
+        body: 'Cleanup Drive on June 26, 2024. Located at MacArthur Highway, Kissea Village, Ulas, Talomo Proper, Talomo District, Davao City, Davao Region, 8023, Philippines',
+    },
+];
+
 const DESKTOP_BREAKPOINT = 768;
+const DAVAO: [number, number] = [125.601, 7.065];
 
-// ── Web map component using maplibre-gl ────────────────────────────────────
-const DAVAO: [number, number] = [125.6010, 7.0650];
+type Screen = 'home' | 'report';
 
+// ── Web map ────────────────────────────────────────────────────────────────────
 function WebMap({ coordinates, onCoordinatesChange }: {
     coordinates: [number, number];
     onCoordinatesChange: (coords: [number, number]) => void;
@@ -38,7 +60,6 @@ function WebMap({ coordinates, onCoordinatesChange }: {
 
     useEffect(() => {
         let map: any;
-        let marker: any;
         import('maplibre-gl').then(({ Map, Marker }) => {
             if (!containerRef.current || mapRef.current) return;
             map = new Map({
@@ -52,7 +73,7 @@ function WebMap({ coordinates, onCoordinatesChange }: {
 
             const el = document.createElement('div');
             el.style.cssText = 'width:20px;height:20px;border-radius:50%;background:#16A637;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);cursor:pointer';
-            marker = new Marker({ element: el, draggable: true })
+            const marker = new Marker({ element: el, draggable: true })
                 .setLngLat(coordinates)
                 .addTo(map);
             markerRef.current = marker;
@@ -61,7 +82,6 @@ function WebMap({ coordinates, onCoordinatesChange }: {
                 const lngLat = marker.getLngLat();
                 onCoordinatesChange([lngLat.lng, lngLat.lat]);
             });
-
             map.on('click', (e: any) => {
                 const { lng, lat } = e.lngLat;
                 marker.setLngLat([lng, lat]);
@@ -75,25 +95,235 @@ function WebMap({ coordinates, onCoordinatesChange }: {
         };
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Sync marker when coordinates change externally
     useEffect(() => {
         markerRef.current?.setLngLat(coordinates);
     }, [coordinates]);
 
     return (
-        <div
-            ref={containerRef}
-            style={{ width: '100%', height: '100%', borderRadius: 16, overflow: 'hidden' }}
-        />
+        <div ref={containerRef} style={{ width: '100%', height: '100%', borderRadius: 16, overflow: 'hidden' }} />
     );
 }
 
+// ── Root ───────────────────────────────────────────────────────────────────────
 export default function ReportScreen() {
     const { isLoggedIn } = useAuth();
     const router = useRouter();
     const { width } = useWindowDimensions();
     const isDesktop = width >= DESKTOP_BREAKPOINT;
+    const [screen, setScreen] = useState<Screen>('home');
 
+    if (!isLoggedIn) {
+        return <LoggedOutGate isDesktop={isDesktop} router={router} />;
+    }
+
+    if (screen === 'report') {
+        return <ReportForm isDesktop={isDesktop} onBack={() => setScreen('home')} />;
+    }
+
+    return <HomeScreen isDesktop={isDesktop} onReportPress={() => setScreen('report')} />;
+}
+
+// ── Logged-out gate ────────────────────────────────────────────────────────────
+function LoggedOutGate({ isDesktop, router }: { isDesktop: boolean; router: any }) {
+    return (
+        <View className="flex-1 bg-[#F0F4F1] items-center justify-center px-8">
+            <View
+                className="bg-white rounded-[24px] p-10 items-center shadow-sm"
+                style={{ width: isDesktop ? 420 : '100%', elevation: 2 }}
+            >
+                <View className="bg-[#E8F5E9] w-16 h-16 rounded-full items-center justify-center mb-5">
+                    <UserLock size={30} color="#16A637" />
+                </View>
+                <Text className="text-[22px] font-extrabold text-[#233329] text-center mb-2">Login Required</Text>
+                <Text className="text-sm text-[#8F9BB3] text-center leading-6 mb-8">
+                    You need to be logged in to submit a garbage report.
+                </Text>
+                <TouchableOpacity
+                    className="bg-[#16A637] rounded-full h-[50px] w-full items-center justify-center mb-4"
+                    onPress={() => router.push('/login' as any)}
+                >
+                    <Text className="text-white font-bold text-base">Login</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push('/signup' as any)}>
+                    <Text className="text-[#8F9BB3] text-sm">
+                        Don't have an account?{' '}
+                        <Text className="text-[#16A637] font-bold">Sign up</Text>
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
+}
+
+// ── Home screen ────────────────────────────────────────────────────────────────
+function HomeScreen({ isDesktop, onReportPress }: { isDesktop: boolean; onReportPress: () => void }) {
+    return (
+        <ScrollView
+            className="flex-1 bg-[#F0F4F1]"
+            contentContainerStyle={{
+                paddingBottom: 60,
+                paddingTop: isDesktop ? 40 : 0,
+                alignItems: isDesktop ? 'center' : undefined,
+            }}
+            showsVerticalScrollIndicator={false}
+        >
+            <View style={{ width: isDesktop ? 720 : '100%' }}>
+        
+
+                {/* Desktop page heading */}
+                {isDesktop && (
+                    <Text className="text-[28px] font-extrabold text-[#233329] mb-6 px-1">Dashboard</Text>
+                )}
+
+                {/* Report an Issue banner */}
+                <View className={isDesktop ? 'mb-8' : 'px-4 pb-4'}>
+                    <TouchableOpacity
+                        style={{
+                            backgroundColor: '#E8F5E9',
+                            borderRadius: 16,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            padding: 16,
+                            gap: 14,
+                        }}
+                        onPress={onReportPress}
+                        activeOpacity={0.75}
+                    >
+                        <View
+                            style={{
+                                backgroundColor: '#16A637',
+                                width: isDesktop ? 60 : 52,
+                                height: isDesktop ? 60 : 52,
+                                borderRadius: 12,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                        >
+                            <Plus size={isDesktop ? 32 : 28} color="#fff" strokeWidth={2.5} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text
+                                style={{
+                                    fontSize: isDesktop ? 20 : 17,
+                                    fontWeight: '800',
+                                    color: '#233329',
+                                }}
+                            >
+                                Report an Issue
+                            </Text>
+                            {isDesktop && (
+                                <Text style={{ fontSize: 13, color: '#8F9BB3', marginTop: 2 }}>
+                                    Tap to submit a new garbage report in your area
+                                </Text>
+                            )}
+                        </View>
+                        {isDesktop && (
+                            <View
+                                style={{
+                                    backgroundColor: '#16A637',
+                                    borderRadius: 20,
+                                    paddingHorizontal: 20,
+                                    paddingVertical: 10,
+                                }}
+                            >
+                                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Report Now</Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                </View>
+
+                {/* Announcements */}
+                <View className={isDesktop ? '' : 'px-4'}>
+                    <View className="flex-row items-center justify-between mb-3">
+                        <Text
+                            style={{ fontSize: isDesktop ? 18 : 16, fontWeight: '800', color: '#233329' }}
+                        >
+                            Announcements
+                        </Text>
+                        <TouchableOpacity>
+                            <Text style={{ fontSize: 13, fontWeight: '600', color: '#16A637', textDecorationLine: 'underline' }}>
+                                View All
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Desktop: 2-column grid via flex-wrap */}
+                    <View
+                        style={
+                            isDesktop
+                                ? { flexDirection: 'row', flexWrap: 'wrap', gap: 16 }
+                                : {}
+                        }
+                    >
+                        {ANNOUNCEMENTS.map((ann) => (
+                            <View
+                                key={ann.id}
+                                style={isDesktop ? { width: 'calc(50% - 8px)' as any } : {}}
+                            >
+                                <AnnouncementCard ann={ann} isDesktop={isDesktop} />
+                            </View>
+                        ))}
+                    </View>
+                </View>
+            </View>
+        </ScrollView>
+    );
+}
+
+// ── Announcement card ──────────────────────────────────────────────────────────
+function AnnouncementCard({
+    ann,
+    isDesktop,
+}: {
+    ann: (typeof ANNOUNCEMENTS)[0];
+    isDesktop: boolean;
+}) {
+    return (
+        <View
+            style={{
+                backgroundColor: '#fff',
+                borderRadius: 16,
+                padding: isDesktop ? 20 : 14,
+                marginBottom: isDesktop ? 0 : 12,
+                borderWidth: 1,
+                borderColor: '#E5E7EB',
+                elevation: 1,
+            }}
+        >
+            <Text style={{ fontSize: 14, fontWeight: '800', color: '#16A637', marginBottom: 8 }}>
+                {ann.title}
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 16, marginBottom: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                    <LocationIcon width={13} height={13} color="#8F9BB3" />
+                    <Text style={{ fontSize: 11, color: '#8F9BB3', fontWeight: '600' }}>{ann.district}</Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                    <CalendarIcon width={13} height={13} color="#8F9BB3" />
+                    <Text style={{ fontSize: 11, color: '#8F9BB3', fontWeight: '600' }}>{ann.date}</Text>
+                </View>
+            </View>
+            <Text style={{ fontSize: 11, color: '#5a6a7a', lineHeight: 17, marginBottom: 12 }}>
+                {ann.body}
+            </Text>
+            <TouchableOpacity
+                style={{
+                    backgroundColor: '#16A637',
+                    borderRadius: 20,
+                    paddingHorizontal: 18,
+                    paddingVertical: 7,
+                    alignSelf: 'flex-start',
+                }}
+                activeOpacity={0.8}
+            >
+                <Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>View Location</Text>
+            </TouchableOpacity>
+        </View>
+    );
+}
+
+// ── Report form ────────────────────────────────────────────────────────────────
+function ReportForm({ isDesktop, onBack }: { isDesktop: boolean; onBack: () => void }) {
     const [location] = useState('Tupas Street, Matina Crossing, Davao City');
     const [coordinates, setCoordinates] = useState<[number, number]>(DAVAO);
     const [issueType, setIssueType] = useState('');
@@ -107,7 +337,6 @@ export default function ReportScreen() {
         setSubmitting(true);
         await new Promise((r) => setTimeout(r, 800));
         setSubmitting(false);
-        // Payload includes coordinates for AWS API
         // { issueType, description, coordinates, location }
         setSubmitted(true);
         setTimeout(() => {
@@ -116,38 +345,6 @@ export default function ReportScreen() {
             setDescription('');
         }, 3000);
     };
-
-    // ── Not logged in gate ───────────────────────────────────────────────────
-    if (!isLoggedIn) {
-        return (
-            <View className="flex-1 bg-[#F0F4F1] items-center justify-center px-8">
-                <View
-                    className="bg-white rounded-[24px] p-10 items-center shadow-sm"
-                    style={{ width: isDesktop ? 420 : '100%', elevation: 2 }}
-                >
-                    <View className="bg-[#E8F5E9] w-16 h-16 rounded-full items-center justify-center mb-5">
-                        <UserLock size={30} color="#16A637" />
-                    </View>
-                    <Text className="text-[22px] font-extrabold text-[#233329] text-center mb-2">Login Required</Text>
-                    <Text className="text-sm text-[#8F9BB3] text-center leading-6 mb-8">
-                        You need to be logged in to submit a garbage report.
-                    </Text>
-                    <TouchableOpacity
-                        className="bg-[#16A637] rounded-full h-[50px] w-full items-center justify-center mb-4"
-                        onPress={() => router.push('/login' as any)}
-                    >
-                        <Text className="text-white font-bold text-base">Login</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => router.push('/signup' as any)}>
-                        <Text className="text-[#8F9BB3] text-sm">
-                            Don't have an account?{' '}
-                            <Text className="text-[#16A637] font-bold">Sign up</Text>
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        );
-    }
 
     return (
         <ScrollView
@@ -160,15 +357,35 @@ export default function ReportScreen() {
             showsVerticalScrollIndicator={false}
         >
             <View style={{ width: isDesktop ? 640 : '100%' }}>
-                {/* Page heading — only show on mobile (desktop has nav header) */}
+
+                {/* Mobile heading with back button */}
                 {!isDesktop && (
-                    <View className="px-6 pt-6 pb-2 bg-[#F8F9FA]">
+                    <View className="flex-row items-center px-5 py-4 bg-[#F8F9FA]" style={{ gap: 12 }}>
+                        <BackButton />
+                        <View className="flex-1 bg-white border border-[#E5E7EB] rounded-full px-5 h-11 justify-center">
+                            <Text className="text-[10px] text-[#8F9BB3] font-bold tracking-widest">CURRENT TAB</Text>
+                            <Text className="text-[13px] font-extrabold text-[#233329]">Report Garbage</Text>
+                        </View>
+                    </View>
+                )}
+
+                {!isDesktop && (
+                    <View className="px-6 pt-4 pb-2 bg-[#F8F9FA]">
                         <Text className="text-[26px] font-extrabold text-[#233329]">Report Details</Text>
                     </View>
                 )}
 
+                {/* Desktop: back link + heading */}
                 {isDesktop && (
-                    <Text className="text-[28px] font-extrabold text-[#233329] mb-6">Report Details</Text>
+                    <View style={{ marginBottom: 24 }}>
+                        <TouchableOpacity
+                            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 16, alignSelf: 'flex-start' }}
+                            onPress={onBack}
+                        >
+                            <Text style={{ fontSize: 13, color: '#16A637', fontWeight: '700' }}>← Back to Dashboard</Text>
+                        </TouchableOpacity>
+                        <Text className="text-[28px] font-extrabold text-[#233329]">Report Details</Text>
+                    </View>
                 )}
 
                 {/* Form card */}
@@ -189,7 +406,10 @@ export default function ReportScreen() {
                 >
                     {/* Success banner */}
                     {submitted && (
-                        <View className="bg-[#E8F5E9] border border-[#16A637] rounded-[12px] px-4 py-3 mb-5 flex-row items-center" style={{ gap: 10 }}>
+                        <View
+                            className="bg-[#E8F5E9] border border-[#16A637] rounded-[12px] px-4 py-3 mb-5 flex-row items-center"
+                            style={{ gap: 10 }}
+                        >
                             <AlertTriangle size={18} color="#16A637" />
                             <Text className="text-[#16A637] font-bold text-sm">Report submitted successfully!</Text>
                         </View>
@@ -198,34 +418,16 @@ export default function ReportScreen() {
                     <View style={{ paddingHorizontal: isDesktop ? 0 : 20, overflow: 'visible' }}>
                         {/* Location */}
                         <Text className="text-[15px] font-extrabold text-[#233329] mb-3">Location</Text>
-
-                        {/* maplibre-gl web map */}
-                        <View
-                            style={{
-                                height: 200,
-                                borderRadius: 16,
-                                overflow: 'hidden',
-                                marginBottom: 12,
-                            }}
-                        >
-                            <WebMap
-                                coordinates={coordinates}
-                                onCoordinatesChange={setCoordinates}
-                            />
+                        <View style={{ height: 200, borderRadius: 16, overflow: 'hidden', marginBottom: 12 }}>
+                            <WebMap coordinates={coordinates} onCoordinatesChange={setCoordinates} />
                         </View>
-
-                        {/* Address */}
                         <View className="bg-white border border-[#E5E7EB] rounded-[12px] px-4 h-[48px] justify-center mb-6">
                             <Text className="text-[#233329] text-sm">{location}</Text>
                         </View>
 
                         {/* Type of Report */}
                         <Text className="text-[15px] font-extrabold text-[#233329] mb-3">Type of Report</Text>
-
-                        {/* Dropdown wrapper — overflow visible so the list floats above */}
                         <View style={{ position: 'relative', zIndex: 10, overflow: 'visible', marginBottom: 24 }}>
-
-                            {/* Options list — floats above the trigger */}
                             {dropdownOpen && (
                                 <View
                                     style={{
@@ -272,8 +474,6 @@ export default function ReportScreen() {
                                     ))}
                                 </View>
                             )}
-
-                            {/* Trigger */}
                             <TouchableOpacity
                                 style={{
                                     backgroundColor: '#fff',
@@ -300,7 +500,6 @@ export default function ReportScreen() {
                                     style={{ transform: [{ rotate: dropdownOpen ? '180deg' : '0deg' }] }}
                                 />
                             </TouchableOpacity>
-
                         </View>
 
                         {/* Description */}
@@ -327,15 +526,12 @@ export default function ReportScreen() {
                             disabled={submitting || !issueType}
                             style={{ opacity: submitting || !issueType ? 0.65 : 1 }}
                         >
-                            <Text
-                                style={{
-                                    fontFamily: 'PlusJakartaSans-ExtraBold',
-                                    fontSize: 15,
-                                    color: '#fff',
-                                    letterSpacing: 1.5,
-                                    fontWeight: '800',
-                                }}
-                            >
+                            <Text style={{
+                                fontSize: 15,
+                                color: '#fff',
+                                letterSpacing: 1.5,
+                                fontWeight: '800',
+                            }}>
                                 {submitting ? 'SUBMITTING...' : 'SUBMIT REPORT'}
                             </Text>
                         </TouchableOpacity>

@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "ewast-mobile",
+    "name": "EWAST",
     "slug": "ewast-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/ewast-logo.svg",
     "scheme": "ewastmobile",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/ewast.svg" 
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +22,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-router",
