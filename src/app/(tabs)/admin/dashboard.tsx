@@ -1,3 +1,4 @@
+import AdminHeatmap from "@/components/admin-heatmap";
 import MetricCard from "@/components/admin-metric";
 import SidebarLayout from "@/components/admin-sidebar.web";
 import { ScrollView, Text, View } from "react-native";
@@ -15,7 +16,7 @@ export default function AdminDashboard() {
 
                     {/* Heatmap and AI Summary Container */}
                     <View className="flex">
-
+                        <AdminHeatmap></AdminHeatmap>
                     </View>
 
                     {/* Metrics */}
