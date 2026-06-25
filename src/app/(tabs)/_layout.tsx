@@ -23,7 +23,30 @@ function WebHeader() {
 
     return (
         <>
-            {/* Desktop Nav Bar */}
+            {/* Desktop Nav Bar (admin side) */}
+            {isDesktop && isAdmin && (
+                <View
+                    className="flex-row items-center justify-between bg-[#F0F4F1] px-10"
+                    style={{ height: 64 }}
+                >
+                    <TouchableOpacity
+                        className='flex-row items-center'
+                        onPress={() => navigateTo('/admin/dashboard')}
+                    >
+                        <Logo height={38} />
+                        <Text className='font-bold' style={
+                            {
+                                fontSize: 38*0.65,
+                                color: '#74B3CE',
+                                lineHeight: 38*0.65*1.05,
+                                letterSpacing: 38*0.65*0.04
+                            }
+                            }>:ADMIN</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
+
+            {/* Desktop Nav Bar (citizen side) */}
             {isDesktop && !isAdmin && (
                 <View
                     className="flex-row items-center justify-between bg-[#F0F4F1] px-10"
