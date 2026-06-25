@@ -1,6 +1,6 @@
 import { useAuth } from '@/components/AuthContext';
 import { AuthColors } from '@/constants/auth-colors';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
     CheckCircle2,
     Clock3,
@@ -8,7 +8,7 @@ import {
     MapPin,
     UserLock
 } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -73,8 +73,18 @@ export default function NotificationsScreen() {
     const { isLoggedIn } = useAuth();
     const router = useRouter();
     const insets = useSafeAreaInsets();
+    const { filter: filterParam } = useLocalSearchParams<{ filter?: string }>();
 
-    const [filter, setFilter] = useState<FilterKey>('resolved');
+    const validFilters: FilterKey[] = ['resolved', 'pending', 'all'];
+    const resolvedParam: FilterKey =
+        validFilters.includes(filterParam as FilterKey) ? (filterParam as FilterKey) : 'resolved';
+
+    const [filter, setFilter] = useState<FilterKey>(resolvedParam);
+
+    // Sync whenever the param changes (tab is already mounted, so useState init won't re-run)
+    useEffect(() => {
+        setFilter(resolvedParam);
+    }, [filterParam]);
 
     const filteredNotifications = useMemo(() => {
         if (filter === 'all') return MOCK_NOTIFICATIONS;

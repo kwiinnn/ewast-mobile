@@ -164,7 +164,11 @@ function ProfileView({ user }: { user: User }) {
 
                     {/* Stats */}
                     <View className="flex-row items-center justify-around">
-                        <View className="flex-1 items-center">
+                        <TouchableOpacity
+                            className="flex-1 items-center"
+                            activeOpacity={0.7}
+                            onPress={() => router.push('/notifs?filter=all' as any)}
+                        >
                             <Text
                                 className="text-[22px]"
                                 style={{ color: AuthColors.green }}
@@ -177,11 +181,15 @@ function ProfileView({ user }: { user: User }) {
                             >
                                 Reports
                             </Text>
-                        </View>
+                        </TouchableOpacity>
 
                         <View className="w-px h-9 bg-gray-200" />
 
-                        <View className="flex-1 items-center">
+                        <TouchableOpacity
+                            className="flex-1 items-center"
+                            activeOpacity={0.7}
+                            onPress={() => router.push('/notifs?filter=resolved' as any)}
+                        >
                             <Text
                                 className="text-[22px]"
                                 style={{ color: AuthColors.green }}
@@ -194,11 +202,15 @@ function ProfileView({ user }: { user: User }) {
                             >
                                 Resolved
                             </Text>
-                        </View>
+                        </TouchableOpacity>
 
                         <View className="w-px h-9 bg-gray-200" />
 
-                        <View className="flex-1 items-center">
+                        <TouchableOpacity
+                            className="flex-1 items-center"
+                            activeOpacity={0.7}
+                            onPress={() => router.push('/notifs?filter=pending' as any)}
+                        >
                             <Text
                                 className="text-[22px]"
                                 style={{ color: AuthColors.green }}
@@ -211,7 +223,7 @@ function ProfileView({ user }: { user: User }) {
                             >
                                 Pending
                             </Text>
-                        </View>
+                        </TouchableOpacity>
                     </View>
                 </View>
 
