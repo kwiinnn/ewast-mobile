@@ -15,8 +15,20 @@ export default function AdminDashboard() {
                     <Text className="text-2xl font-bold">Davao City</Text>
 
                     {/* Heatmap and AI Summary Container */}
-                    <View className="flex">
+                    <View className="flex-row gap-4">
                         <AdminHeatmap></AdminHeatmap>
+                        <View className="bg-[rgba(234,196,53,0.25)] w-1/2 rounded-2xl border border-[#DAD0D0] overflow-hidden">
+                            {/* heading */}
+                            <View className="px-5 py-4">
+                                <Text className="font-bold">AI Summary</Text>
+                            </View>
+
+                            <View className="px-5 py-4">
+                                <Text className="font-normal">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ac arcu  ligula. In vestibulum vel augue vel convallis.  Aenean ut nisl lobortis,  convallis leo eu, luctus diam. Aenean vel faucibus quam. Sed imperdiet vitae dolor vel eleifend.
+                                </Text>
+                            </View>
+                        </View>
                     </View>
 
                     {/* Metrics */}
