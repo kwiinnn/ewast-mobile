@@ -1,3 +1,4 @@
+import { router, usePathname } from "expo-router";
 import { useState } from "react";
 import {
   Modal,
@@ -6,7 +7,7 @@ import {
   useWindowDimensions,
   View
 } from "react-native";
- 
+
 const BREAKPOINT = 768;
 
 type nav_item = {
@@ -15,16 +16,17 @@ type nav_item = {
 };
  
 const NAV_ITEMS: nav_item[] = [
-  { label: "Dashboard", route: "/dashboard" },
-  { label: "Routes",     route: "/routes"     },
-  { label: "Operators",   route: "/operators"   }
+  { label: "Dashboard", route: "/admin/dashboard" },
+  { label: "Routes",     route: "/admin/routes"     },
+  { label: "Operators",   route: "/admin/operators"   },
+  { label: "Announcements",   route: "/admin/announcements"   }
 ];
 
 type SidebarProps = {
   activeRoute: string;
   onNavigate: (route: string) => void;
 };
- 
+
 function SidebarContent({ activeRoute, onNavigate }: SidebarProps) {
   return (
     <View className="flex-1">
@@ -74,13 +76,14 @@ export default function SidebarLayout() {
   const isDesktop = width >= BREAKPOINT;
  
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [activeRoute, setActiveRoute] = useState("/dashboard");
- 
+  const [activeRoute, setActiveRoute] = useState(usePathname());
+
   function handleNavigate(route: string) {
     setActiveRoute(route);
     setDrawerOpen(false);
+    router.push(route); 
   }
- 
+
   return (
     <View className="w-auto flex-row bg-white border border-[#DAD0D0]">
  
