@@ -1,6 +1,6 @@
 import { useAuth } from '@/components/AuthContext';
 import Logo from '@/components/logo';
-import { Tabs, useRouter } from 'expo-router';
+import { Tabs, usePathname, useRouter } from 'expo-router';
 import { Bell, Home, Map, PlusSquare, User, UserPlus } from 'lucide-react-native';
 import { Platform, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,6 +15,7 @@ function WebHeader() {
     const { width } = useWindowDimensions();
 
     const isDesktop = width >= DESKTOP_BREAKPOINT;
+    const isAdmin = usePathname().startsWith("/admin");
 
     const navigateTo = (path: string) => {
         router.push(path as any);
@@ -23,7 +24,7 @@ function WebHeader() {
     return (
         <>
             {/* Desktop Nav Bar */}
-            {isDesktop && (
+            {isDesktop && !isAdmin && (
                 <View
                     className="flex-row items-center justify-between bg-[#F0F4F1] px-10"
                     style={{ height: 64 }}
@@ -68,7 +69,7 @@ function WebHeader() {
             )}
 
             {/* Mobile Header (No Hamburger) */}
-            {!isDesktop && (
+            {!isDesktop && !isAdmin && (
                 <View className="flex-row justify-between items-center px-6 py-4" style={{ marginTop: insets.top }}>
                     <Logo height={50} />
                     <View className="flex-row items-center">
