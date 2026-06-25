@@ -11,39 +11,6 @@ const DAVAO: [number, number] = [125.6010, 7.0650];
 function WebMap() {
     const containerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<any>(null);
-    
-    useEffect(() => {
-        let map: any;
-
-        import('maplibre-gl').then(({ Map }) => {
-            if (!containerRef.current || mapRef.current) return;
-
-            map = new Map({
-                container: containerRef.current,
-                style: 'https://tiles.openfreemap.org/styles/liberty',
-                center: DAVAO,
-                zoom: 10,
-                attributionControl: false,
-            });
-
-            mapRef.current = map;
-        });
-
-        return () => {
-            mapRef.current?.remove();
-            mapRef.current = null;
-        };
-    }, []);
-    
-    return (
-        <div
-            ref={containerRef}
-            style={{ width: '100%', height: '100%' }}
-        />
-  );
-}
-
-export default function AdminHeatmap() {
     const [state, setState] = useState<FetchState>({status: "loading"});
 
     useEffect(()=>{
@@ -60,13 +27,77 @@ export default function AdminHeatmap() {
             if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
 
             const data = await response.json();
-            console.log(data[0].name);
+
             setState({ status: "success", payload: data });
         } catch (error) {
             setState({ status: "error", message: error });
         }
     };
+    
+    useEffect(() => {
+        let map: any;
 
+        import('maplibre-gl').then(({ Map }) => {
+            if (!containerRef.current || mapRef.current) return;
+
+            const map = new Map({
+                container: containerRef.current,
+                style: 'https://tiles.openfreemap.org/styles/liberty',
+                center: DAVAO,
+                zoom: 10,
+                attributionControl: false,
+            });
+
+            mapRef.current = map;
+
+            map.on('load', () => {
+                state.payload.forEach((barangay_data) => {
+                    const curr_geojson = {
+                        type: 'FeatureCollection',
+                        features: [
+                            {
+                            type: 'Feature',
+                            properties: {
+                                id: barangay_data.name,
+                                name: barangay_data.name,
+                            },
+                            geometry: {
+                                type: 'Polygon',
+                                coordinates: [barangay_data.bounds_coords.map(([lat, lng]) => [lng, lat])], // wrap in an extra array
+                            },
+                            },
+                        ],
+                    };
+
+                    map.addSource(barangay_data.name, { type: 'geojson', data: curr_geojson});
+
+                    const fillColor: string = "#3D7EFF";
+                    const fillOpacity: number = 0.2;
+
+                    map.addLayer({
+                        id: `${barangay_data.name}-fill`,
+                        type: 'fill',
+                        source: barangay_data.name,
+                        paint: {
+                            'fill-color': fillColor,
+                            'fill-opacity': [
+                                'case',
+                                ['boolean', ['feature-state', 'hover'], false],
+                                fillOpacity * 2.5,  // brighter on hover
+                                fillOpacity,
+                            ],
+                        },
+                    });
+                });
+            });
+        });
+
+        return () => {
+            mapRef.current?.remove();
+            mapRef.current = null;
+        };
+    }, []);
+    
     return (
         <>
             {/* Loading */}
@@ -85,11 +116,20 @@ export default function AdminHeatmap() {
             )}
 
             {state.status === "success" && (
-                <View className="w-1/2" style={{ height: 400 }}>
-                    <WebMap>
-                    </WebMap>
-                </View>
+                <div
+                    ref={containerRef}
+                    style={{ width: '100%', height: '100%' }}
+                />
             )}
         </>
+  );
+}
+
+export default function AdminHeatmap() {
+    return (
+        <View className="w-1/2 rounded-2xl border border-[#DAD0D0] overflow-hidden" style={{ height: 400 }}>
+            <WebMap>
+            </WebMap>
+        </View>
     );
 }
