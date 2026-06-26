@@ -1,34 +1,20 @@
 import BackIcon from '@/assets/icons/back.svg';
+import WebMap from '@/components/WebMap'; // ← bundler picks .web.tsx or .tsx automatically
 import { AuthColors } from '@/constants/auth-colors';
-import * as MapLibre from '@maplibre/maplibre-react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
+const CENTER: [number, number] = [125.5406, 7.0498];
 
 export default function RoutesScreen() {
     const router = useRouter();
     const { barangay, date } = useLocalSearchParams<{ barangay: string; date: string }>();
-    const cameraRef = useRef<React.ElementRef<typeof Camera>>(null);
 
     return (
         <View style={styles.container}>
-            {/* Full-screen Map */}
-            <MapLibre.Map
-                style={styles.map}
-                mapStyle={MAP_STYLE}
-                attributionEnabled={false}
-                compassEnabled={false}
-            >
-                <MapLibre.Camera
-                    ref={cameraRef}
-                    zoom={14}
-                    center={[125.5406, 7.0498]}
-                    easing="fly"
-                    duration={2000}
-                />
-            </MapLibre.Map>
+            <View style={StyleSheet.absoluteFill}>
+                <WebMap center={CENTER} zoom={14} />
+            </View>
 
             {/* Header Overlay */}
             <View style={styles.headerOverlay}>
@@ -40,9 +26,7 @@ export default function RoutesScreen() {
                     <BackIcon width={22} height={22} color={AuthColors.white} />
                 </TouchableOpacity>
                 <View style={styles.headerText}>
-                    <Text style={styles.routeTitle}>
-                        Route for {barangay ?? 'Mintal'}
-                    </Text>
+                    <Text style={styles.routeTitle}>Route for {barangay ?? 'Mintal'}</Text>
                     <Text style={styles.routeDate}>{date ?? '06/26/2026'}</Text>
                 </View>
             </View>
@@ -52,7 +36,7 @@ export default function RoutesScreen() {
                 <TouchableOpacity
                     style={styles.trackButton}
                     activeOpacity={0.85}
-                    onPress={() => { /* TODO: implement live tracking */ }}
+                    onPress={() => { /* TODO: live tracking */ }}
                 >
                     <Text style={styles.trackButtonText}>Track Live</Text>
                 </TouchableOpacity>
@@ -62,17 +46,10 @@ export default function RoutesScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    map: {
-        flex: 1,
-    },
+    container: { flex: 1 },
     headerOverlay: {
         position: 'absolute',
-        top: 16,
-        left: 16,
-        right: 16,
+        top: 16, left: 16, right: 16,
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -87,32 +64,16 @@ const styles = StyleSheet.create({
         elevation: 4,
     },
     backButton: {
-        width: 40,
-        height: 40,
+        width: 40, height: 40,
         borderRadius: 12,
         backgroundColor: AuthColors.green,
         alignItems: 'center',
         justifyContent: 'center',
     },
-    headerText: {
-        gap: 2,
-    },
-    routeTitle: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: AuthColors.dark,
-    },
-    routeDate: {
-        fontSize: 13,
-        fontWeight: '400',
-        color: AuthColors.dark,
-        opacity: 0.7,
-    },
-    trackButtonContainer: {
-        position: 'absolute',
-        top: 104,
-        right: 16,
-    },
+    headerText: { gap: 2 },
+    routeTitle: { fontSize: 16, fontWeight: '700', color: AuthColors.dark },
+    routeDate: { fontSize: 13, fontWeight: '400', color: AuthColors.dark, opacity: 0.7 },
+    trackButtonContainer: { position: 'absolute', top: 104, right: 16 },
     trackButton: {
         backgroundColor: AuthColors.green,
         borderRadius: 999,
@@ -124,9 +85,5 @@ const styles = StyleSheet.create({
         shadowRadius: 6,
         elevation: 4,
     },
-    trackButtonText: {
-        color: AuthColors.white,
-        fontSize: 14,
-        fontWeight: '700',
-    },
+    trackButtonText: { color: AuthColors.white, fontSize: 14, fontWeight: '700' },
 });
