@@ -142,9 +142,13 @@ export default function HomeScreen() {
     return (
         <>
             {isDesktop ? (
-                <View className="flex-1 items-center justify-center bg-[#F0F4F1]">
+                <ScrollView 
+                    className="flex-1 bg-[#F0F4F1]"
+                    contentContainerStyle={{ alignItems: 'center', paddingVertical: 40, paddingHorizontal: 24 }}
+                    showsVerticalScrollIndicator={false}
+                >
                     <View
-                        className="bg-white rounded-[28px] shadow-sm"
+                        className="bg-white rounded-[28px] shadow-sm mb-6"
                         style={{ width: 460, paddingHorizontal: 40, paddingVertical: 28, elevation: 2 }}
                     >
                         <Text className="text-[26px] font-extrabold text-center text-[#233329]">
@@ -200,7 +204,20 @@ export default function HomeScreen() {
                             </View>
                         </View>
                     </View>
-                </View>
+
+                    {/* ── Announcements (Desktop) ─────────────────────────────── */}
+                    <View style={{ width: 460 }}>
+                        <View className="flex-row items-center justify-between mb-3 px-1">
+                            <Text className="text-[16px] font-extrabold text-[#233329]">{t('report.announcements', language)}{' '}</Text>
+                            <TouchableOpacity>
+                                <Text className="text-[13px] font-semibold text-[#16A637] underline">{t('report.view', language)}{' '}</Text>
+                            </TouchableOpacity>
+                        </View>
+                        {ANNOUNCEMENTS.map((ann) => (
+                            <AnnouncementCard key={ann.id} ann={ann} />
+                        ))}
+                    </View>
+                </ScrollView>
             ) : (
                 <ScrollView
                     className="flex-1 bg-[#F0F4F1]"
@@ -242,13 +259,19 @@ export default function HomeScreen() {
                         </TouchableOpacity>
                         <View className="flex-row justify-center gap-10 mt-2">
                             <View className="items-center">
-                                <TouchableOpacity className="bg-[#233329] w-[76px] h-[76px] rounded-[24px] items-center justify-center mb-3 shadow-sm">
+                                <TouchableOpacity 
+                                    className="bg-[#233329] w-[76px] h-[76px] rounded-[24px] items-center justify-center mb-3 shadow-sm"
+                                    onPress={() => navigateTo('/schedules')}
+                                >
                                     <CalendarDays size={34} color="#FFFFFF" />
                                 </TouchableOpacity>
                                 <Text className="text-[#233329] font-medium text-base">{t('home.track.schedules', language)}</Text>
                             </View>
                             <View className="items-center">
-                                <TouchableOpacity className="bg-[#233329] w-[76px] h-[76px] rounded-[24px] items-center justify-center mb-3 shadow-sm">
+                                <TouchableOpacity 
+                                    className="bg-[#233329] w-[76px] h-[76px] rounded-[24px] items-center justify-center mb-3 shadow-sm"
+                                    onPress={() => navigateTo('/routes')}
+                                >
                                     <MapIcon size={34} color="#FFFFFF" />
                                 </TouchableOpacity>
                                 <Text className="text-[#233329] font-medium text-base">{t('home.track.heatmap', language)}</Text>
@@ -256,7 +279,7 @@ export default function HomeScreen() {
                         </View>
                     </View>
 
-                    {/* ── Announcements ─────────────────────────────────────── */}
+                    {/* ── Announcements (Mobile) ─────────────────────────────── */}
                     <View className="mt-6">
                         <View className="flex-row items-center justify-between mb-3">
                             <Text className="text-[16px] font-extrabold text-[#233329]">{t('report.announcements', language)}{' '}</Text>
