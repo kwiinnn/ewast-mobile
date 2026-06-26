@@ -8,7 +8,7 @@
     "scheme": "ewastmobile",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/ewast.svg" 
+      "icon": "./assets/ewast.svg"
     },
     "android": {
       "adaptiveIcon": {
@@ -37,7 +37,8 @@
         }
       ],
       "expo-image",
-      "@maplibre/maplibre-react-native"
+      "@maplibre/maplibre-react-native",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
