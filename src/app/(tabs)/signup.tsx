@@ -23,20 +23,22 @@ import Logo from '@/components/logo';
 
 // Shared auth components
 import { AuthInput } from '@/components/auth/AuthInput';
-import { useAuth } from '@/components/AuthContext';
 import { AuthColors } from '@/constants/auth-colors';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface FormData {
-    fullName: string;
+    firstname: string;
+    lastname: string;
     email: string;
     password: string;
     confirmPassword: string;
+    role: 'citizen' | 'driver' | 'admin';
 }
 
 interface FieldErrors {
-    fullName?: string;
+    firstname?: string;
+    lastname?: string;
     email?: string;
     password?: string;
     confirmPassword?: string;
@@ -322,11 +324,20 @@ function Step1Profile({
             </Text>
 
             <AuthInput
-                label="Full Name"
-                placeholder="Enter your full name"
-                value={data.fullName}
-                onChangeText={(v) => onChange('fullName', v)}
-                error={errors.fullName}
+                label="First Name"
+                placeholder="Enter your first name"
+                value={data.firstname}
+                onChangeText={(v) => onChange('firstname', v)}
+                error={errors.firstname}
+                Icon={UserIcon}
+                autoCapitalize="words"
+            />
+            <AuthInput
+                label="Last Name"
+                placeholder="Enter your last name"
+                value={data.lastname}
+                onChangeText={(v) => onChange('lastname', v)}
+                error={errors.lastname}
                 Icon={UserIcon}
                 autoCapitalize="words"
             />
@@ -373,14 +384,47 @@ function Step2Security({
     onContinue: () => void;
     onBack: () => void;
 }) {
+    const pwd = data.password;
+    const checks = [
+        { label: 'At least 8 characters long', met: pwd.length >= 8 },
+        { label: 'At least one lowercase letter', met: /[a-z]/.test(pwd) },
+        { label: 'At least one uppercase letter', met: /[A-Z]/.test(pwd) },
+        { label: 'At least one special character (e.g. * or -)', met: /[^a-zA-Z0-9]/.test(pwd) },
+    ];
+
     return (
         <View style={{ backgroundColor: '#fff', borderRadius: 16, marginTop: 16, padding: 24, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } }}>
             <Text className="font-extrabold" style={{ fontSize: 22, color: AuthColors.dark, marginBottom: 4 }}>
                 Account Security
             </Text>
-            <Text style={{ fontSize: 14, color: AuthColors.dark, opacity: 0.6, marginBottom: 20 }}>
+            <Text style={{ fontSize: 14, color: AuthColors.dark, opacity: 0.6, marginBottom: 16 }}>
                 Secure your account! Password must contain at least 8 characters
             </Text>
+
+            {/* Password checklist */}
+            <View style={{ backgroundColor: '#F9FAFB', borderRadius: 12, padding: 14, marginBottom: 20, gap: 10 }}>
+                {checks.map((check) => (
+                    <View key={check.label} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                        <View
+                            style={{
+                                width: 20,
+                                height: 20,
+                                borderRadius: 10,
+                                backgroundColor: check.met ? AuthColors.green : 'transparent',
+                                borderWidth: check.met ? 0 : 1.5,
+                                borderColor: AuthColors.placeholder,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                        >
+                            {check.met && <CheckIcon width={12} height={12} color="#fff" />}
+                        </View>
+                        <Text style={{ fontSize: 13, color: check.met ? AuthColors.green : AuthColors.placeholder }}>
+                            {check.label}
+                        </Text>
+                    </View>
+                ))}
+            </View>
 
             <AuthInput
                 label="Password"
@@ -467,11 +511,13 @@ function Step3Review({
     onBack,
     onCreate,
     loading,
+    apiError,
 }: {
     data: FormData;
     onBack: () => void;
     onCreate: () => void;
     loading: boolean;
+    apiError: string | null;
 }) {
     return (
         <View style={{ backgroundColor: '#fff', borderRadius: 16, marginTop: 16, padding: 24, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } }}>
@@ -482,9 +528,16 @@ function Step3Review({
                 Almost done! Review and confirm your account details
             </Text>
 
-            <ReviewRow label="Full Name" value={data.fullName} Icon={UserIcon} />
+            <ReviewRow label="First Name" value={data.firstname} Icon={UserIcon} />
+            <ReviewRow label="Last Name" value={data.lastname} Icon={UserIcon} />
             <ReviewRow label="Email" value={data.email} Icon={MailIcon} />
             <ReviewRow label="Password" value={data.password} Icon={EyeCloseIcon} masked />
+
+            {apiError && (
+                <View style={{ backgroundColor: '#FEE2E2', borderRadius: 8, padding: 12, marginBottom: 12 }}>
+                    <Text style={{ fontSize: 13, color: '#B91C1C' }}>{apiError}</Text>
+                </View>
+            )}
 
             <View style={{ flexDirection: 'row', marginTop: 8, gap: 12 }}>
                 <TouchableOpacity
@@ -527,29 +580,32 @@ function Step3Review({
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function SignupScreenWeb() {
-    const { signup } = useAuth();
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [form, setForm] = useState<FormData>({
-        fullName: '',
+        firstname: '',
+        lastname: '',
         email: '',
         password: '',
         confirmPassword: '',
+        role: 'citizen',
     });
+    const [apiError, setApiError] = useState<string | null>(null);
     const [errors, setErrors] = useState<FieldErrors>({});
 
     useWebStyles();
 
     const setField = (field: keyof FormData, value: string) => {
         setForm((prev) => ({ ...prev, [field]: value }));
-        if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
+        if (field in errors) setErrors((prev) => ({ ...prev, [field]: undefined }));
     };
 
     // ── Validation ──────────────────────────────────────────────────────────
 
     const validateStep1 = (): boolean => {
         const newErrors: FieldErrors = {};
-        if (!form.fullName.trim()) newErrors.fullName = 'Invalid';
+        if (!form.firstname.trim()) newErrors.firstname = 'Invalid';
+        if (!form.lastname.trim()) newErrors.lastname = 'Invalid';
         if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
             newErrors.email = 'Invalid';
         setErrors(newErrors);
@@ -558,7 +614,8 @@ export default function SignupScreenWeb() {
 
     const validateStep2 = (): boolean => {
         const newErrors: FieldErrors = {};
-        if (form.password.length < 8) newErrors.password = 'Invalid';
+        const pwd = form.password;
+        if (pwd.length < 8 || !/[a-z]/.test(pwd) || !/[A-Z]/.test(pwd) || !/[^a-zA-Z0-9]/.test(pwd)) newErrors.password = 'Invalid';
         if (form.confirmPassword !== form.password) newErrors.confirmPassword = 'Invalid';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -574,15 +631,56 @@ export default function SignupScreenWeb() {
 
     const handleCreate = async () => {
         setLoading(true);
+        setApiError(null);
         try {
-            await signup({
-                fullName: form.fullName,
-                email: form.email,
-                password: form.password,
+            // Use an environment variable or define your backend host directly
+            //CHANGE TO DEPLOYED
+            const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+
+            const response = await fetch(`${API_BASE_URL}/api/users/signup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    firstname: form.firstname,
+                    lastname: form.lastname,
+                    email: form.email,
+                    password: form.password,
+                    password_confirm: form.confirmPassword,
+                    role: form.role,
+                }),
             });
-            router.replace('/(tabs)');
+
+            if (response.status === 201) {
+                router.replace('/(tabs)');
+                return;
+            }
+
+            const data = await response.json();
+
+            if (response.status === 422 && data.detail) {
+                console.log("BACKEND VALIDATION ERRORS:", JSON.stringify(data.detail, null, 2));
+
+                // Map FastAPI validation errors back to field errors
+                const newErrors: FieldErrors = {};
+                for (const err of data.detail) {
+                    const field = err.loc?.[1] as string | undefined;
+                    if (field === 'firstname') newErrors.firstname = err.msg;
+                    else if (field === 'lastname') newErrors.lastname = err.msg;
+                    else if (field === 'email') newErrors.email = err.msg;
+                    else if (field === 'password') newErrors.password = err.msg;
+                    else if (field === 'password_confirm') newErrors.confirmPassword = err.msg;
+                }
+                if (Object.keys(newErrors).length > 0) {
+                    setErrors(newErrors);
+                    setStep(Object.keys(newErrors).some(k => ['firstname', 'lastname', 'email'].includes(k)) ? 1 : 2);
+                } else {
+                    setApiError(data.detail?.[0]?.msg ?? 'Validation failed. Please check your details.');
+                }
+            } else {
+                setApiError(data?.detail ?? 'Something went wrong. Please try again.');
+            }
         } catch {
-            // TODO: Show error
+            setApiError('Network error. Please check your connection and try again.');
         } finally {
             setLoading(false);
         }
@@ -629,6 +727,7 @@ export default function SignupScreenWeb() {
                             onBack={() => setStep(2)}
                             onCreate={handleCreate}
                             loading={loading}
+                            apiError={apiError}
                         />
                     )}
 
@@ -637,7 +736,7 @@ export default function SignupScreenWeb() {
                             Already have an account?{' '}
                         </Text>
                         <TouchableOpacity onPress={() => router.push('/login')}>
-                            <Text style={{ fontSize: 14, color: AuthColors.green}}>
+                            <Text style={{ fontSize: 14, color: AuthColors.green }}>
                                 Sign in
                             </Text>
                         </TouchableOpacity>

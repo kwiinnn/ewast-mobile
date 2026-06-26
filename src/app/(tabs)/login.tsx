@@ -22,6 +22,34 @@ import { AuthInput } from '@/components/auth/AuthInput';
 import { useAuth } from '@/components/AuthContext';
 import { AuthColors } from '@/constants/auth-colors';
 
+// ─── API ──────────────────────────────────────────────────────────────────────
+
+//CHANGE TO DEPLOYED
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
+console.log("API URL:", process.env.EXPO_PUBLIC_API_URL);
+
+interface LoginResponse {
+    access_token: string;
+    token_type: string;
+}
+
+async function loginRequest(email: string, password: string): Promise<LoginResponse> {
+    const response = await fetch(`${API_BASE_URL}/api/users/login`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+        // 401 / 422 from the backend → treat as bad credentials
+        throw new Error(`Login failed: ${response.status}`);
+    }
+
+    return response.json() as Promise<LoginResponse>;
+}
+
 // ─── Inject CSS grid layout (web only) ───────────────────────────────────────
 // React Native Web doesn't reliably support gap / CSS grid via StyleSheet,
 // so we inject a real <style> tag once on mount.
@@ -182,19 +210,13 @@ function DeviceMockup() {
                 </View>
 
                 {/* ── Monitor stand ──────────────────────────────────────────────
-                    FIX: anchored absolutely with the SAME left/width as the
-                    monitor bezel above, instead of being a separate sibling
-                    centered within the outer 520px-wide container. Previously
-                    the stand centered itself relative to the full 520px box
-                    (which exists to make room for the overlapping phone), so
-                    it sat ~30px to the right of the monitor's actual center.
-                    Anchoring it to left:0 / width:460 — identical to the
-                    monitor — guarantees it's always centered under the
-                    monitor itself, regardless of how wide the outer box is. */}
+                    Anchored absolutely with the SAME left/width as the monitor
+                    bezel so it's always centered under the monitor itself,
+                    regardless of how wide the outer box is. */}
                 <View
                     style={{
                         position: 'absolute',
-                        top: 310, // sits right at the bottom edge of the bezel
+                        top: 310,
                         left: 0,
                         width: 460,
                         alignItems: 'center',
@@ -211,7 +233,12 @@ function DeviceMockup() {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function LoginScreenWeb() {
-    const { login } = useAuth();
+    // AuthContext is expected to expose a `setToken` (or similar) method so the
+    // rest of the app can attach the Bearer token to subsequent requests.
+    // If your AuthContext still exposes `login(email, password)` and handles
+    // the API call itself, you can revert to calling that instead.
+    const { setToken } = useAuth();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -229,7 +256,12 @@ export default function LoginScreenWeb() {
         setError(null);
         setLoading(true);
         try {
-            await login(email.trim(), password);
+            const { access_token, token_type } = await loginRequest(email.trim(), password);
+
+            // Persist the token in your AuthContext so every subsequent
+            // API call can attach:  Authorization: Bearer <access_token>
+            setToken(access_token, token_type);
+
             router.replace('/');
         } catch {
             setError('Invalid Username or Password');
