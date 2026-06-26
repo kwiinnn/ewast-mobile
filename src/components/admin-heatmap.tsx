@@ -1,6 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 
+export interface BoundaryProperties {
+  id: string | number;
+  name: string;
+  [key: string]: unknown;
+}
+
+interface PopupInfo {
+  properties: BoundaryProperties;
+  lngLat: [number, number];
+}
+
 type FetchState =
   | { status: "loading" }
   | { status: "error"; message: string }
@@ -11,7 +22,9 @@ const DAVAO: [number, number] = [125.6010, 7.0650];
 function WebMap() {
     const containerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<any>(null);
+    const popupRef = useRef<any>(null);
     const [state, setState] = useState<FetchState>({status: "loading"});
+    const [popup, setPopup] = useState<PopupInfo | null>(null);
 
     useEffect(()=>{
         getBarangayInfo();
@@ -19,7 +32,7 @@ function WebMap() {
 
     const getBarangayInfo = async () => {
         try {
-            const response = await fetch('http://localhost:8000/api/barangays', {
+            const response = await fetch('http://localhost:8000/api/barangays/geojson', {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
             });
@@ -37,7 +50,7 @@ function WebMap() {
     useEffect(() => {
         let map: any;
 
-        import('maplibre-gl').then(({ Map }) => {
+        import('maplibre-gl').then(({ Map, Popup }) => {
             if (!containerRef.current || mapRef.current) return;
 
             const map = new Map({
@@ -51,33 +64,19 @@ function WebMap() {
             mapRef.current = map;
 
             map.on('load', () => {
-                state.payload.forEach((barangay_data) => {
-                    const curr_geojson = {
-                        type: 'FeatureCollection',
-                        features: [
-                            {
-                            type: 'Feature',
-                            properties: {
-                                id: barangay_data.name,
-                                name: barangay_data.name,
-                            },
-                            geometry: {
-                                type: 'Polygon',
-                                coordinates: [barangay_data.bounds_coords.map(([lat, lng]) => [lng, lat])], // wrap in an extra array
-                            },
-                            },
-                        ],
-                    };
-
-                    map.addSource(barangay_data.name, { type: 'geojson', data: curr_geojson});
+                state.payload.forEach((barangay_info) => {
+                    console.log(`${barangay_info.barangay_name}, ${barangay_info.geojson}`);
+                    map.addSource(barangay_info.barangay_name, { type: 'geojson', data: barangay_info.geojson});
 
                     const fillColor: string = "#3D7EFF";
                     const fillOpacity: number = 0.2;
+                    const strokeColor: string = "#1A56CC"
+                    const strokeWidth: number = 1;
 
                     map.addLayer({
-                        id: `${barangay_data.name}-fill`,
+                        id: `${barangay_info.barangay_name}-fill`,
                         type: 'fill',
-                        source: barangay_data.name,
+                        source: barangay_info.barangay_name,
                         paint: {
                             'fill-color': fillColor,
                             'fill-opacity': [
@@ -87,6 +86,46 @@ function WebMap() {
                                 fillOpacity,
                             ],
                         },
+                    });
+
+                    map.addLayer({
+                        id: `${barangay_info.barangay_name}-stroke`,
+                        type: 'line',
+                        source: barangay_info.barangay_name,
+                        paint: {
+                            'line-color': strokeColor,
+                            'line-width': [
+                                'case',
+                                ['boolean', ['feature-state', 'hover'], false],
+                                strokeWidth * 2,    // thicker on hover
+                                strokeWidth,
+                            ],
+                        },
+                    });
+
+                    map.on('click', `${barangay_info.barangay_name}-fill`, (e: any) => {
+                        if (!e.features?.length) return;
+
+                        if (popupRef.current) {
+                            popupRef.current.remove();
+                        }
+
+                        console.log(`I clicked ${barangay_info.barangay_name}`);
+
+                        const feature = e.features[0];
+                        
+                        popupRef.current = new Popup({ closeOnClick: true })
+                            .setLngLat(e.lngLat)
+                            .setHTML(`<div><h4 class=\"font-bold\">${barangay_info.barangay_name}</h4>Test</div>`)
+                            .addTo(map);
+                    });
+
+                    map.on('mouseenter', `${barangay_info.barangay_name}-fill`, () => {
+                            map.getCanvas().style.cursor = 'pointer';
+                        });
+
+                    map.on('mouseleave', `${barangay_info.barangay_name}-fill`, () => {
+                        map.getCanvas().style.cursor = '';
                     });
                 });
             });
