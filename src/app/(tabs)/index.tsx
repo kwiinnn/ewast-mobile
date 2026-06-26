@@ -1,5 +1,6 @@
 import CalendarIcon from '@/assets/icons/calendar.svg';
 import LocationIcon from '@/assets/icons/location.svg';
+import ReportIcon from '@/assets/icons/report.svg';
 import { useAuth } from '@/components/AuthContext';
 import { AuthColors } from '@/constants/auth-colors';
 import { t } from '@/constants/translations';
@@ -102,36 +103,25 @@ export default function HomeScreen() {
                         </Text>
                     </View>
                     {/* CTA Buttons */}
-                    <View className="flex-row justify-between" style={{ gap: 10 }}>
-                        <TouchableOpacity
-                            className="flex-1 bg-[#16A637] rounded-full items-center justify-center"
-                            style={{ height: isDesktop ? 46 : 44 }}
-                            onPress={() => navigateTo('/schedules')}
-                        >
-                            <Text className="text-white font-extrabold tracking-widest uppercase" style={{ fontSize: 11 }}>
-                                {t('home.guest.schedules', language)}
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            className="flex-1 bg-[#16A637] rounded-full items-center justify-center"
-                            style={{ height: isDesktop ? 46 : 44 }}
-                            onPress={() => navigateTo('/data')}
-                        >
-                            <Text className="text-white font-extrabold tracking-widest uppercase" style={{ fontSize: 11 }}>
-                                {t('home.guest.data', language)}
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            className="flex-1 bg-[#16A637] rounded-full items-center justify-center"
-                            style={{ height: isDesktop ? 46 : 44 }}
-                            onPress={() => navigateTo('/report')}
-                        >
-                            <Text className="text-white font-extrabold tracking-widest uppercase" style={{ fontSize: 11 }}>
-                                {t('home.guest.report', language)}
-                            </Text>
-                        </TouchableOpacity>
+                    <View className="flex-row justify-center gap-8">
+                        <View className="items-center">
+                            <TouchableOpacity
+                                className="bg-[#233329] w-[68px] h-[68px] rounded-[20px] items-center justify-center mb-2"
+                                onPress={() => navigateTo('/schedules')}
+                            >
+                                <CalendarDays size={30} color="#FFFFFF" />
+                            </TouchableOpacity>
+                            <Text className="text-[#233329] font-medium text-sm">{t('home.guest.schedules', language)}</Text>
+                        </View>
+                        <View className="items-center">
+                            <TouchableOpacity
+                                className="bg-[#233329] w-[68px] h-[68px] rounded-[20px] items-center justify-center mb-2"
+                                onPress={() => navigateTo('/report')}
+                            >
+                                <ReportIcon width={30} height={30} color="#FFFFFF" />
+                            </TouchableOpacity>
+                            <Text className="text-[#233329] font-medium text-sm">{t('home.guest.report', language)}</Text>
+                        </View>
                     </View>
                 </View>
             </View>
