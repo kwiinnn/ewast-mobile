@@ -1,9 +1,42 @@
 import AdminHeatmap from "@/components/admin-heatmap";
 import MetricCard from "@/components/admin-metric";
+import RecentReports from "@/components/admin-reports";
 import SidebarLayout from "@/components/admin-sidebar.web";
+import ThemesView from "@/components/admin-themes";
+import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 export default function AdminDashboard() {
+    const [reportData, setReportData] = useState([]);
+    const [reportError, setReportError] = useState<string | null>(null);
+    const [themesData, setThemesData] = useState([]);
+    const [themesError, setThemesError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch("http://localhost:8000/api/reports/stats/report-themes");
+                if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
+                const data = await res.json();
+                setThemesData(data);
+            } catch (err) {
+                setThemesError(err instanceof Error ? err.message : "Something went wrong");
+            }
+
+            try {
+                const res = await fetch("http://localhost:8000/api/reports");
+                if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
+                const data = await res.json();
+                setReportData(data);
+            } catch (err) {
+                setReportError(err instanceof Error ? err.message : "Something went wrong");
+            }
+        };
+
+        fetchData();
+    }, []);
+
+
     return (
         <View className="flex-row h-full">
             <SidebarLayout></SidebarLayout>
@@ -53,12 +86,19 @@ export default function AdminDashboard() {
 
                     {/* Recent Reports */}
                     <View>
-                        
+                        <RecentReports data={reportData}></RecentReports>
                     </View>
 
-                    {/* Thematic Analysis Breakdown */}
-                    <View>
 
+
+                    {/* Thematic Analysis Breakdown */}
+                    <View className="flex w-full bg-white rounded-2xl border border-[#DAD0D0] overflow-hidden">
+                        <View className="px-5 py-4 border-b border-gray-100">
+                            <Text className="font-bold text-gray-900">Report Description Analysis</Text>
+                        </View>
+
+                        {!themesError && (<ThemesView data={themesData}></ThemesView>)}
+                        {themesError && (<Text>Network Error when attempting to fetch resource</Text>)}
                     </View>
                 </View>
             </ScrollView>
