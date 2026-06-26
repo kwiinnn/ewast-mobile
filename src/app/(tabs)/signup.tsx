@@ -23,6 +23,7 @@ import Logo from '@/components/logo';
 
 // Shared auth components
 import { AuthInput } from '@/components/auth/AuthInput';
+import { ApiError, useAuth } from '@/components/AuthContext';
 import { AuthColors } from '@/constants/auth-colors';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -580,6 +581,7 @@ function Step3Review({
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function SignupScreenWeb() {
+    const { signup } = useAuth();
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [form, setForm] = useState<FormData>({
@@ -633,54 +635,56 @@ export default function SignupScreenWeb() {
         setLoading(true);
         setApiError(null);
         try {
-            // Use an environment variable or define your backend host directly
-            //CHANGE TO DEPLOYED
-            const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-
-            const response = await fetch(`${API_BASE_URL}/api/users/signup`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    firstname: form.firstname,
-                    lastname: form.lastname,
-                    email: form.email,
-                    password: form.password,
-                    password_confirm: form.confirmPassword,
-                    role: form.role,
-                }),
+            await signup({
+                firstname: form.firstname,
+                lastname: form.lastname,
+                email: form.email,
+                password: form.password,
+                password_confirm: form.confirmPassword,
+                role: form.role,
             });
+            // Signup returns no token — redirect to login
+            router.replace('/login');
+        } catch (err: unknown) {
+            console.error('[Signup] error:', err);
 
-            if (response.status === 201) {
-                router.replace('/(tabs)');
-                return;
-            }
-
-            const data = await response.json();
-
-            if (response.status === 422 && data.detail) {
-                console.log("BACKEND VALIDATION ERRORS:", JSON.stringify(data.detail, null, 2));
-
-                // Map FastAPI validation errors back to field errors
-                const newErrors: FieldErrors = {};
-                for (const err of data.detail) {
-                    const field = err.loc?.[1] as string | undefined;
-                    if (field === 'firstname') newErrors.firstname = err.msg;
-                    else if (field === 'lastname') newErrors.lastname = err.msg;
-                    else if (field === 'email') newErrors.email = err.msg;
-                    else if (field === 'password') newErrors.password = err.msg;
-                    else if (field === 'password_confirm') newErrors.confirmPassword = err.msg;
-                }
-                if (Object.keys(newErrors).length > 0) {
-                    setErrors(newErrors);
-                    setStep(Object.keys(newErrors).some(k => ['firstname', 'lastname', 'email'].includes(k)) ? 1 : 2);
+            if (err instanceof ApiError) {
+                if (err.status === 422) {
+                    // Map FastAPI field validation errors back to the form
+                    const detail = (err.body as { detail?: { loc: string[]; msg: string }[] })?.detail;
+                    if (detail && detail.length > 0) {
+                        const newErrors: FieldErrors = {};
+                        for (const e of detail) {
+                            const field = e.loc?.[1];
+                            if (field === 'firstname') newErrors.firstname = e.msg;
+                            else if (field === 'lastname') newErrors.lastname = e.msg;
+                            else if (field === 'email') newErrors.email = e.msg;
+                            else if (field === 'password') newErrors.password = e.msg;
+                            else if (field === 'password_confirm') newErrors.confirmPassword = e.msg;
+                        }
+                        if (Object.keys(newErrors).length > 0) {
+                            setErrors(newErrors);
+                            setStep(Object.keys(newErrors).some(k => ['firstname', 'lastname', 'email'].includes(k)) ? 1 : 2);
+                        } else {
+                            setApiError(detail[0]?.msg ?? 'Validation failed.');
+                        }
+                    } else {
+                        setApiError('Validation failed. Please check your details.');
+                    }
+                } else if (err.status === 409) {
+                    setApiError('An account with this email already exists.');
                 } else {
-                    setApiError(data.detail?.[0]?.msg ?? 'Validation failed. Please check your details.');
+                    setApiError(`Server error (${err.status}). Please try again.`);
                 }
             } else {
-                setApiError(data?.detail ?? 'Something went wrong. Please try again.');
+                // Network-level failure (CORS, DNS, no connection, env not set)
+                const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+                if (!apiUrl) {
+                    setApiError('EXPO_PUBLIC_API_URL is not set. Check your .env file.');
+                } else {
+                    setApiError(`Network error reaching ${apiUrl}. Check your connection or CORS settings.`);
+                }
             }
-        } catch {
-            setApiError('Network error. Please check your connection and try again.');
         } finally {
             setLoading(false);
         }

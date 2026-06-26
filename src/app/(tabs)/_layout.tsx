@@ -2,14 +2,14 @@ import { useAuth } from '@/components/AuthContext';
 import Logo from '@/components/logo';
 import { Tabs, usePathname, useRouter } from 'expo-router';
 import { Bell, Home, Map, PlusSquare, User, UserPlus } from 'lucide-react-native';
-import { Platform, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { ActivityIndicator, Platform, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const DESKTOP_BREAKPOINT = 768;
 
 // ── Shared Web Header (desktop nav + mobile hamburger) ──────────────────────
 function WebHeader() {
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, logout } = useAuth();
     const insets = useSafeAreaInsets();
     const router = useRouter();
     const { width } = useWindowDimensions();
@@ -63,7 +63,7 @@ function WebHeader() {
                         <TouchableOpacity onPress={() => navigateTo('/report')}>
                             <Text className="text-sm font-bold tracking-widest text-[#233329]">REPORT</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => navigateTo('/routes')}>
+                        <TouchableOpacity onPress={() => navigateTo('/schedules')}>
                             <Text className="text-sm font-bold tracking-widest text-[#233329]">ROUTES</Text>
                         </TouchableOpacity>
                     </View>
@@ -95,11 +95,15 @@ function WebHeader() {
             {!isDesktop && !isAdmin && (
                 <View className="flex-row justify-between items-center px-6 py-4" style={{ marginTop: insets.top }}>
                     <Logo height={50} />
-                    <View className="flex-row items-center">
-                        {isLoggedIn && (
-                            <TouchableOpacity className="relative mr-2" onPress={() => navigateTo('/notifs')}>
+                    <View className="flex-row items-center" style={{ gap: 12 }}>
+                        {isLoggedIn ? (
+                            <TouchableOpacity className="relative" onPress={() => navigateTo('/notifs')}>
                                 <Bell size={26} color="#233329" />
                                 <View className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[#F0F4F1]" />
+                            </TouchableOpacity>
+                        ) : (
+                            <TouchableOpacity onPress={() => navigateTo('/login')}>
+                                <UserPlus size={26} color="#16A637" />
                             </TouchableOpacity>
                         )}
                     </View>
@@ -111,9 +115,10 @@ function WebHeader() {
 
 // ── Native Bottom Tab Bar ────────────────────────────────────────────────────
 function CustomTabBar({ state, descriptors, navigation }: any) {
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, logout } = useAuth();
     const insets = useSafeAreaInsets();
     const { width } = useWindowDimensions();
+    const router = useRouter();
     const isDesktop = width >= DESKTOP_BREAKPOINT;
 
     if (Platform.OS === 'web' && isDesktop) return null;
@@ -142,6 +147,11 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
                 const isFocused = state.index === state.routes.findIndex((r: any) => r.key === route.key);
 
                 const onPress = () => {
+                    // Profile tab → go to /login if not authenticated
+                    if (route.name === 'profile' && !isLoggedIn) {
+                        router.push('/login' as any);
+                        return;
+                    }
                     const event = navigation.emit({
                         type: 'tabPress',
                         target: route.key,
@@ -183,6 +193,20 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
 
 // ── Layout ───────────────────────────────────────────────────────────────────
 export default function TabsLayout() {
+    const { isLoading } = useAuth();
+
+    // Block render until AsyncStorage rehydration is complete.
+    // Without this, isLoggedIn is always false on first paint (even when the
+    // user has a stored token), causing the header/tab bar to flash the
+    // logged-out UI before snapping to the correct state.
+    if (isLoading) {
+        return (
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F0F4F1' }}>
+                <ActivityIndicator size="large" color="#16A637" />
+            </View>
+        );
+    }
+
     return (
         <View className="flex-1 bg-[#F0F4F1]">
             {/* Web header rendered above all tab screens */}

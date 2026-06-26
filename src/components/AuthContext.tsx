@@ -17,6 +17,7 @@ type Language = 'english' | 'bisaya';
 
 type AuthContextType = {
   isLoggedIn: boolean;
+  isLoading: boolean;
   user: User | null;
   token: string | null;
   /** Called by the login screen after a successful POST /api/users/login */
@@ -53,6 +54,16 @@ interface SignupResponse {
   role: string;
 }
 
+export class ApiError extends Error {
+  status: number;
+  body: unknown;
+  constructor(status: number, body: unknown) {
+    super(`Request failed: ${status}`);
+    this.status = status;
+    this.body = body;
+  }
+}
+
 async function apiSignup(payload: SignupPayload): Promise<SignupResponse> {
   const response = await fetch(`${API_BASE_URL}/api/users/signup`, {
     method: 'POST',
@@ -61,7 +72,9 @@ async function apiSignup(payload: SignupPayload): Promise<SignupResponse> {
   });
 
   if (!response.ok) {
-    throw new Error(`Signup failed: ${response.status}`);
+    let body: unknown;
+    try { body = await response.json(); } catch { body = null; }
+    throw new ApiError(response.status, body);
   }
 
   return response.json() as Promise<SignupResponse>;
@@ -75,12 +88,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setTokenState] = useState<string | null>(null);
   const [language, setLanguage] = useState<Language>('english');
+  const [isLoading, setIsLoading] = useState(true);
 
   // Rehydrate token from storage on app launch
   useEffect(() => {
-    AsyncStorage.getItem(TOKEN_KEY).then((stored: string | null) => {
-      if (stored) setTokenState(stored);
-    });
+    AsyncStorage.getItem(TOKEN_KEY)
+      .then((stored: string | null) => {
+        if (stored) setTokenState(stored);
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   /**
@@ -135,6 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider
       value={{
         isLoggedIn: !!token,
+        isLoading,
         user,
         token,
         setToken,

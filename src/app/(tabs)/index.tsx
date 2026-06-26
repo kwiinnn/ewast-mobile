@@ -1,5 +1,6 @@
 import CalendarIcon from '@/assets/icons/calendar.svg';
 import LocationIcon from '@/assets/icons/location.svg';
+import ReportIcon from '@/assets/icons/report.svg';
 import { useAuth } from '@/components/AuthContext';
 import { AuthColors } from '@/constants/auth-colors';
 import { t } from '@/constants/translations';
@@ -102,36 +103,25 @@ export default function HomeScreen() {
                         </Text>
                     </View>
                     {/* CTA Buttons */}
-                    <View className="flex-row justify-between" style={{ gap: 10 }}>
-                        <TouchableOpacity
-                            className="flex-1 bg-[#16A637] rounded-full items-center justify-center"
-                            style={{ height: isDesktop ? 46 : 44 }}
-                            onPress={() => navigateTo('/schedules')}
-                        >
-                            <Text className="text-white font-extrabold tracking-widest uppercase" style={{ fontSize: 11 }}>
-                                {t('home.guest.schedules', language)}
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            className="flex-1 bg-[#16A637] rounded-full items-center justify-center"
-                            style={{ height: isDesktop ? 46 : 44 }}
-                            onPress={() => navigateTo('/data')}
-                        >
-                            <Text className="text-white font-extrabold tracking-widest uppercase" style={{ fontSize: 11 }}>
-                                {t('home.guest.data', language)}
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            className="flex-1 bg-[#16A637] rounded-full items-center justify-center"
-                            style={{ height: isDesktop ? 46 : 44 }}
-                            onPress={() => navigateTo('/report')}
-                        >
-                            <Text className="text-white font-extrabold tracking-widest uppercase" style={{ fontSize: 11 }}>
-                                {t('home.guest.report', language)}
-                            </Text>
-                        </TouchableOpacity>
+                    <View className="flex-row justify-center gap-8">
+                        <View className="items-center">
+                            <TouchableOpacity
+                                className="bg-[#233329] w-[68px] h-[68px] rounded-[20px] items-center justify-center mb-2"
+                                onPress={() => navigateTo('/schedules')}
+                            >
+                                <CalendarDays size={30} color="#FFFFFF" />
+                            </TouchableOpacity>
+                            <Text className="text-[#233329] font-medium text-sm">{t('home.guest.schedules', language)}</Text>
+                        </View>
+                        <View className="items-center">
+                            <TouchableOpacity
+                                className="bg-[#233329] w-[68px] h-[68px] rounded-[20px] items-center justify-center mb-2"
+                                onPress={() => navigateTo('/report')}
+                            >
+                                <ReportIcon width={30} height={30} color="#FFFFFF" />
+                            </TouchableOpacity>
+                            <Text className="text-[#233329] font-medium text-sm">{t('home.guest.report', language)}</Text>
+                        </View>
                     </View>
                 </View>
             </View>
@@ -142,9 +132,13 @@ export default function HomeScreen() {
     return (
         <>
             {isDesktop ? (
-                <View className="flex-1 items-center justify-center bg-[#F0F4F1]">
+                <ScrollView 
+                    className="flex-1 bg-[#F0F4F1]"
+                    contentContainerStyle={{ alignItems: 'center', paddingVertical: 40, paddingHorizontal: 24 }}
+                    showsVerticalScrollIndicator={false}
+                >
                     <View
-                        className="bg-white rounded-[28px] shadow-sm"
+                        className="bg-white rounded-[28px] shadow-sm mb-6"
                         style={{ width: 460, paddingHorizontal: 40, paddingVertical: 28, elevation: 2 }}
                     >
                         <Text className="text-[26px] font-extrabold text-center text-[#233329]">
@@ -200,7 +194,20 @@ export default function HomeScreen() {
                             </View>
                         </View>
                     </View>
-                </View>
+
+                    {/* ── Announcements (Desktop) ─────────────────────────────── */}
+                    <View style={{ width: 460 }}>
+                        <View className="flex-row items-center justify-between mb-3 px-1">
+                            <Text className="text-[16px] font-extrabold text-[#233329]">{t('report.announcements', language)}{' '}</Text>
+                            <TouchableOpacity>
+                                <Text className="text-[13px] font-semibold text-[#16A637] underline">{t('report.view', language)}{' '}</Text>
+                            </TouchableOpacity>
+                        </View>
+                        {ANNOUNCEMENTS.map((ann) => (
+                            <AnnouncementCard key={ann.id} ann={ann} />
+                        ))}
+                    </View>
+                </ScrollView>
             ) : (
                 <ScrollView
                     className="flex-1 bg-[#F0F4F1]"
@@ -242,13 +249,19 @@ export default function HomeScreen() {
                         </TouchableOpacity>
                         <View className="flex-row justify-center gap-10 mt-2">
                             <View className="items-center">
-                                <TouchableOpacity className="bg-[#233329] w-[76px] h-[76px] rounded-[24px] items-center justify-center mb-3 shadow-sm">
+                                <TouchableOpacity 
+                                    className="bg-[#233329] w-[76px] h-[76px] rounded-[24px] items-center justify-center mb-3 shadow-sm"
+                                    onPress={() => navigateTo('/schedules')}
+                                >
                                     <CalendarDays size={34} color="#FFFFFF" />
                                 </TouchableOpacity>
                                 <Text className="text-[#233329] font-medium text-base">{t('home.track.schedules', language)}</Text>
                             </View>
                             <View className="items-center">
-                                <TouchableOpacity className="bg-[#233329] w-[76px] h-[76px] rounded-[24px] items-center justify-center mb-3 shadow-sm">
+                                <TouchableOpacity 
+                                    className="bg-[#233329] w-[76px] h-[76px] rounded-[24px] items-center justify-center mb-3 shadow-sm"
+                                    onPress={() => navigateTo('/routes')}
+                                >
                                     <MapIcon size={34} color="#FFFFFF" />
                                 </TouchableOpacity>
                                 <Text className="text-[#233329] font-medium text-base">{t('home.track.heatmap', language)}</Text>
@@ -256,7 +269,7 @@ export default function HomeScreen() {
                         </View>
                     </View>
 
-                    {/* ── Announcements ─────────────────────────────────────── */}
+                    {/* ── Announcements (Mobile) ─────────────────────────────── */}
                     <View className="mt-6">
                         <View className="flex-row items-center justify-between mb-3">
                             <Text className="text-[16px] font-extrabold text-[#233329]">{t('report.announcements', language)}{' '}</Text>
