@@ -1,6 +1,6 @@
 import { useAuth } from '@/components/AuthContext';
 import Logo from '@/components/logo';
-import { Tabs, useRouter } from 'expo-router';
+import { Tabs, usePathname, useRouter } from 'expo-router';
 import { Bell, Home, Map, PlusSquare, User, UserPlus } from 'lucide-react-native';
 import { ActivityIndicator, Platform, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,6 +15,7 @@ function WebHeader() {
     const { width } = useWindowDimensions();
 
     const isDesktop = width >= DESKTOP_BREAKPOINT;
+    const isAdmin = usePathname().startsWith("/admin");
 
     const navigateTo = (path: string) => {
         router.push(path as any);
@@ -22,8 +23,31 @@ function WebHeader() {
 
     return (
         <>
-            {/* Desktop Nav Bar */}
-            {isDesktop && (
+            {/* Desktop Nav Bar (admin side) */}
+            {isDesktop && isAdmin && (
+                <View
+          className="flex-row items-center justify-between bg-[#F0F4F1] px-10 border border-[#DAD0D0]"
+                    style={{ height: 64 }}
+                >
+                    <TouchableOpacity
+                        className='flex-row items-center'
+                        onPress={() => navigateTo('/admin/dashboard')}
+                    >
+                        <Logo height={38} />
+                        <Text className='font-bold' style={
+                            {
+                                fontSize: 38*0.65,
+                                color: '#74B3CE',
+                                lineHeight: 38*0.65*1.05,
+                                letterSpacing: 38*0.65*0.04
+                            }
+                            }>:ADMIN</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
+
+            {/* Desktop Nav Bar (citizen side) */}
+            {isDesktop && !isAdmin && (
                 <View
                     className="flex-row items-center justify-between bg-[#F0F4F1] px-10"
                     style={{ height: 64 }}
@@ -67,8 +91,8 @@ function WebHeader() {
                 </View>
             )}
 
-            {/* Mobile Header */}
-            {!isDesktop && (
+            {/* Mobile Header (No Hamburger) */}
+            {!isDesktop && !isAdmin && (
                 <View className="flex-row justify-between items-center px-6 py-4" style={{ marginTop: insets.top }}>
                     <Logo height={50} />
                     <View className="flex-row items-center" style={{ gap: 12 }}>
