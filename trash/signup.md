@@ -1,6 +1,9 @@
 import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
     ScrollView,
     Text,
     TouchableOpacity,
@@ -16,12 +19,8 @@ import MailIcon from '@/assets/icons/mail.svg';
 import ReviewIcon from '@/assets/icons/review.svg';
 import UserIcon from '@/assets/icons/user.svg';
 
-// Brand assets for the showcase panel
-import Truck from '@/assets/icons/truck2.svg';
-import Showcase from '@/assets/showcase.svg';
-import Logo from '@/components/logo';
-
 // Shared auth components
+import { AuthHeader } from '@/components/auth/AuthHeader';
 import { AuthInput } from '@/components/auth/AuthInput';
 import { useAuth } from '@/components/AuthContext';
 import { AuthColors } from '@/constants/auth-colors';
@@ -42,189 +41,6 @@ interface FieldErrors {
     confirmPassword?: string;
 }
 
-// ─── Inject CSS grid layout (web only) ───────────────────────────────────────
-
-function useWebStyles() {
-    useEffect(() => {
-        const id = 'ewast-signup-web-styles';
-        if (document.getElementById(id)) return;
-        const el = document.createElement('style');
-        el.id = id;
-        el.textContent = `
-            .ewast-signup-root {
-                display: flex;
-                flex: 1;
-                min-height: 100%;
-                flex-direction: row;
-                align-items: flex-start;
-                padding: 40px 48px 60px 48px;
-                gap: 48px;
-                box-sizing: border-box;
-            }
-            .ewast-signup-left {
-                flex: 0 0 420px;
-                min-width: 0;
-            }
-            .ewast-signup-right {
-                flex: 1 1 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                min-width: 0;
-                padding-top: 48px;
-            }
-            .ewast-signup-signin-hint {
-                display: none;
-            }
-
-            /* ── Mobile: hide the device showcase entirely, center the card ── */
-            @media (max-width: 768px) {
-                .ewast-signup-signin-hint {
-                    display: flex;
-                    flex-direction: row;
-                    justify-content: center;
-                    margin-top: 20px;
-                    padding-bottom: 8px;
-                }
-                .ewast-signup-root {
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    padding: 24px 20px;
-                    gap: 0;
-                }
-                .ewast-signup-left {
-                    flex: 0 0 auto;
-                    width: 100%;
-                    max-width: 420px;
-                }
-                .ewast-signup-right {
-                    display: none;
-                }
-            }
-        `;
-        document.head.appendChild(el);
-        return () => { el.remove(); };
-    }, []);
-}
-
-// ─── Device Mockup ────────────────────────────────────────────────────────────
-
-function DeviceMockup() {
-    return (
-        <View style={{ alignItems: 'center' }}>
-            {/* Wrapper that establishes a local stacking context for the phone overlap */}
-            <View style={{ position: 'relative', width: 520, height: 346 }}>
-
-                {/* ── Monitor bezel ── */}
-                <View
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: 460,
-                        height: 310,
-                        backgroundColor: '#1a1a1a',
-                        borderRadius: 16,
-                        padding: 10,
-                        shadowColor: '#000',
-                        shadowOpacity: 0.3,
-                        shadowRadius: 24,
-                        shadowOffset: { width: 0, height: 8 },
-                    }}
-                >
-                    {/* Screen */}
-                    <View
-                        style={{
-                            flex: 1,
-                            backgroundColor: '#ffffff',
-                            borderRadius: 8,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: 16,
-                        }}
-                    >
-                        <Logo height={70} />
-                        <Truck width={101} height={75} className="ml-8" />
-                    </View>
-                </View>
-
-                {/* ── Smartphone (overlaps bottom-right of monitor) ── */}
-                <View
-                    style={{
-                        position: 'absolute',
-                        top: 40,
-                        right: 0,
-                        width: 155,
-                        height: 300,
-                        backgroundColor: '#111',
-                        borderRadius: 30,
-                        padding: 7,
-                        shadowColor: '#000',
-                        shadowOpacity: 0.45,
-                        shadowRadius: 20,
-                        shadowOffset: { width: 0, height: 6 },
-                        borderWidth: 1,
-                        borderColor: '#2a2a2a',
-                    }}
-                >
-                    {/* Dynamic island pill */}
-                    <View
-                        style={{
-                            alignSelf: 'center',
-                            width: 36,
-                            height: 10,
-                            backgroundColor: '#000',
-                            borderRadius: 5,
-                            marginBottom: 4,
-                        }}
-                    />
-
-                    {/* Phone screen */}
-                    <View
-                        style={{
-                            flex: 1,
-                            backgroundColor: '#fff',
-                            borderRadius: 22,
-                            overflow: 'hidden',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                    >
-                        <Showcase />
-                    </View>
-
-                    {/* Home bar */}
-                    <View
-                        style={{
-                            alignSelf: 'center',
-                            marginTop: 6,
-                            width: 44,
-                            height: 4,
-                            backgroundColor: '#444',
-                            borderRadius: 2,
-                        }}
-                    />
-                </View>
-
-                {/* ── Monitor stand ── */}
-                <View
-                    style={{
-                        position: 'absolute',
-                        top: 310,
-                        left: 0,
-                        width: 460,
-                        alignItems: 'center',
-                    }}
-                >
-                    <View style={{ width: 38, height: 26, backgroundColor: '#2a2a2a' }} />
-                    <View style={{ width: 130, height: 10, backgroundColor: '#2a2a2a', borderRadius: 5 }} />
-                </View>
-            </View>
-        </View>
-    );
-}
-
 // ─── Step Indicator ──────────────────────────────────────────────────────────
 
 const STEPS = [
@@ -235,8 +51,8 @@ const STEPS = [
 
 function StepIndicator({ currentStep }: { currentStep: number }) {
     return (
-        <View style={{ backgroundColor: '#fff', borderRadius: 16, paddingHorizontal: 24, paddingVertical: 20, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+        <View className="bg-white rounded-2xl px-6 py-5 mx-4 shadow-sm">
+            <View className="flex-row items-center justify-center">
                 {STEPS.map((step, index) => {
                     const stepNum = index + 1;
                     const isCompleted = stepNum < currentStep;
@@ -249,7 +65,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
 
                     return (
                         <React.Fragment key={step.label}>
-                            <View style={{ alignItems: 'center' }}>
+                            <View className="items-center">
                                 <View
                                     style={{
                                         width: 48,
@@ -299,6 +115,27 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
     );
 }
 
+// ─── Step Banner ─────────────────────────────────────────────────────────────
+
+function StepBanner({ step }: { step: number }) {
+    return (
+        <View
+            style={{
+                backgroundColor: AuthColors.greenLight,
+                borderRadius: 10,
+                marginHorizontal: 16,
+                marginTop: 16,
+                paddingVertical: 10,
+                paddingHorizontal: 16,
+            }}
+        >
+            <Text style={{ fontSize: 14, color: AuthColors.green }}>
+                Step {step} of 3
+            </Text>
+        </View>
+    );
+}
+
 // ─── Step 1: Profile ─────────────────────────────────────────────────────────
 
 function Step1Profile({
@@ -313,8 +150,8 @@ function Step1Profile({
     onContinue: () => void;
 }) {
     return (
-        <View style={{ backgroundColor: '#fff', borderRadius: 16, marginTop: 16, padding: 24, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } }}>
-            <Text className="font-extrabold" style={{ fontSize: 25, color: AuthColors.dark, marginBottom: 4 }}>
+        <View className="bg-white rounded-2xl mx-4 mt-4 p-6 shadow-sm">
+            <Text className="font-extrabold" style={{ fontSize: 22, color: AuthColors.dark, marginBottom: 4 }}>
                 Your Profile
             </Text>
             <Text style={{ fontSize: 14, color: AuthColors.dark, opacity: 0.6, marginBottom: 20 }}>
@@ -374,7 +211,7 @@ function Step2Security({
     onBack: () => void;
 }) {
     return (
-        <View style={{ backgroundColor: '#fff', borderRadius: 16, marginTop: 16, padding: 24, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } }}>
+        <View className="bg-white rounded-2xl mx-4 mt-4 p-6 shadow-sm">
             <Text className="font-extrabold" style={{ fontSize: 22, color: AuthColors.dark, marginBottom: 4 }}>
                 Account Security
             </Text>
@@ -401,7 +238,7 @@ function Step2Security({
                 secureTextEntry
             />
 
-            <View style={{ flexDirection: 'row', marginTop: 8, gap: 12 }}>
+            <View className="flex-row mt-2" style={{ gap: 12 }}>
                 <TouchableOpacity
                     onPress={onBack}
                     style={{
@@ -448,11 +285,11 @@ function ReviewRow({
     masked?: boolean;
 }) {
     return (
-        <View style={{ marginBottom: 20 }}>
+        <View className="mb-5">
             <Text style={{ fontSize: 12, color: AuthColors.green, marginBottom: 2 }}>
                 {label}
             </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <View className="flex-row items-center" style={{ gap: 10 }}>
                 <Icon width={18} height={18} color={AuthColors.dark} />
                 <Text style={{ fontSize: 15, color: AuthColors.dark }}>
                     {masked ? '•'.repeat(Math.max(value.length, 10)) : value}
@@ -474,7 +311,7 @@ function Step3Review({
     loading: boolean;
 }) {
     return (
-        <View style={{ backgroundColor: '#fff', borderRadius: 16, marginTop: 16, padding: 24, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } }}>
+        <View className="bg-white rounded-2xl mx-4 mt-4 p-6 shadow-sm">
             <Text className="font-extrabold" style={{ fontSize: 22, color: AuthColors.dark, marginBottom: 4 }}>
                 Review Details
             </Text>
@@ -486,7 +323,7 @@ function Step3Review({
             <ReviewRow label="Email" value={data.email} Icon={MailIcon} />
             <ReviewRow label="Password" value={data.password} Icon={EyeCloseIcon} masked />
 
-            <View style={{ flexDirection: 'row', marginTop: 8, gap: 12 }}>
+            <View className="flex-row mt-2" style={{ gap: 12 }}>
                 <TouchableOpacity
                     onPress={onBack}
                     disabled={loading}
@@ -524,9 +361,9 @@ function Step3Review({
     );
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
+// ─── Root Screen ─────────────────────────────────────────────────────────────
 
-export default function SignupScreenWeb() {
+export default function SignupScreen() {
     const { signup } = useAuth();
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -537,8 +374,6 @@ export default function SignupScreenWeb() {
         confirmPassword: '',
     });
     const [errors, setErrors] = useState<FieldErrors>({});
-
-    useWebStyles();
 
     const setField = (field: keyof FormData, value: string) => {
         setForm((prev) => ({ ...prev, [field]: value }));
@@ -589,23 +424,32 @@ export default function SignupScreenWeb() {
     };
 
     return (
-        <ScrollView
-            style={{ flex: 1, backgroundColor: AuthColors.background }}
-            contentContainerStyle={{ flexGrow: 1 }}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-        >
-            {/* @ts-ignore — className is web-only */}
-            <View className="ewast-signup-root">
+        <SafeAreaView style={{ flex: 1, backgroundColor: AuthColors.background }}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{ flex: 1 }}
+            >
+                <ScrollView
+                    contentContainerStyle={{ paddingBottom: 40 }}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* ── Header ── */}
+                    <AuthHeader
+                        title="SIGNUP"
+                        onBack={() => {
+                            if (step > 1) setStep((s) => s - 1);
+                            else router.back();
+                        }}
+                    />
 
-                {/* ── LEFT: title + stepper + form ── */}
-                {/* @ts-ignore — className is web-only */}
-                <View className="ewast-signup-left">
-
-                    {/* Step Indicator */}
+                    {/* ── Step Indicator ── */}
                     <StepIndicator currentStep={step} />
 
-                    {/* Form Step */}
+                    {/* ── Step Banner ── */}
+                    <StepBanner step={step} />
+
+                    {/* ── Form Step ── */}
                     {step === 1 && (
                         <Step1Profile
                             data={form}
@@ -631,26 +475,8 @@ export default function SignupScreenWeb() {
                             loading={loading}
                         />
                     )}
-
-                    <View className="ewast-signup-signin-hint">
-                        <Text style={{ fontSize: 14, color: AuthColors.dark }}>
-                            Already have an account?{' '}
-                        </Text>
-                        <TouchableOpacity onPress={() => router.push('/login')}>
-                            <Text style={{ fontSize: 14, color: AuthColors.green}}>
-                                Sign in
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
-                {/* ── RIGHT: device showcase ── */}
-                {/* @ts-ignore — className is web-only */}
-                <View className="ewast-signup-right">
-                    <DeviceMockup />
-                </View>
-
-            </View>
-        </ScrollView>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 }

@@ -1,23 +1,17 @@
-import CalendarIcon from '@/assets/icons/calendar.svg';
-import LocationIcon from '@/assets/icons/location.svg';
 import { useAuth } from '@/components/AuthContext';
-import { BackButton } from '@/components/backbutton';
 import { t } from '@/constants/translations';
-import { Camera, GeoJSONSource, Layer, Map as MapLibreMap } from '@maplibre/maplibre-react-native';
 import { useRouter } from 'expo-router';
-import { ChevronDown, Plus, UserLock } from 'lucide-react-native';
-import { useState } from 'react';
+import { AlertTriangle, ChevronDown, UserLock } from 'lucide-react-native';
+import { useEffect, useRef, useState } from 'react';
 import {
-    Alert,
-    Modal,
-    Pressable,
     ScrollView,
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    useWindowDimensions,
+    View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 
 const ISSUE_TYPES = [
     'Drainage blockage',
@@ -31,60 +25,96 @@ const ISSUE_TYPES = [
     'Illegal dumping',
 ];
 
-const ANNOUNCEMENTS = [
-    {
-        id: '1',
-        title: 'Littering in Water Bodies',
-        district: 'Talomo',
-        date: '06/24/2026',
-        body: 'Cleanup Drive on June 26, 2024. Located at MacArthur Highway, Kissea Village, Ulas, Talomo Proper, Talomo District, Davao City, Davao Region, 8023, Philippines',
-    },
-    {
-        id: '2',
-        title: 'Littering in Water Bodies',
-        district: 'Talomo',
-        date: '06/24/2026',
-        body: 'Cleanup Drive on June 26, 2024. Located at MacArthur Highway, Kissea Village, Ulas, Talomo Proper, Talomo District, Davao City, Davao Region, 8023, Philippines',
-    },
-];
+const DESKTOP_BREAKPOINT = 768;
+const DAVAO: [number, number] = [125.601, 7.065];
 
-type Screen = 'home' | 'report';
 
+// ── Web map ────────────────────────────────────────────────────────────────────
+function WebMap({ coordinates, onCoordinatesChange }: {
+    coordinates: [number, number];
+    onCoordinatesChange: (coords: [number, number]) => void;
+}) {
+    const containerRef = useRef<any>(null);
+    const mapRef = useRef<any>(null);
+    const markerRef = useRef<any>(null);
+
+    useEffect(() => {
+        let map: any;
+        import('maplibre-gl').then(({ Map, Marker }) => {
+            if (!containerRef.current || mapRef.current) return;
+            map = new Map({
+                container: containerRef.current,
+                style: 'https://tiles.openfreemap.org/styles/liberty',
+                center: coordinates,
+                zoom: 15,
+                attributionControl: false,
+            });
+            mapRef.current = map;
+
+            const el = document.createElement('div');
+            el.style.cssText = 'width:20px;height:20px;border-radius:50%;background:#16A637;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);cursor:pointer';
+            const marker = new Marker({ element: el, draggable: true })
+                .setLngLat(coordinates)
+                .addTo(map);
+            markerRef.current = marker;
+
+            marker.on('dragend', () => {
+                const lngLat = marker.getLngLat();
+                onCoordinatesChange([lngLat.lng, lngLat.lat]);
+            });
+            map.on('click', (e: any) => {
+                const { lng, lat } = e.lngLat;
+                marker.setLngLat([lng, lat]);
+                onCoordinatesChange([lng, lat]);
+            });
+        });
+        return () => {
+            mapRef.current?.remove();
+            mapRef.current = null;
+            markerRef.current = null;
+        };
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    useEffect(() => {
+        markerRef.current?.setLngLat(coordinates);
+    }, [coordinates]);
+
+    return (
+        <div ref={containerRef} style={{ width: '100%', height: '100%', borderRadius: 16, overflow: 'hidden' }} />
+    );
+}
+
+// ── Root ───────────────────────────────────────────────────────────────────────
 export default function ReportScreen() {
-    const { isLoggedIn, language } = useAuth();
+    const { isLoggedIn } = useAuth();
     const router = useRouter();
-    const insets = useSafeAreaInsets();
-    const [screen, setScreen] = useState<Screen>('home');
+    const { width } = useWindowDimensions();
+    const isDesktop = width >= DESKTOP_BREAKPOINT;
 
     if (!isLoggedIn) {
-        return <LoggedOutGate insets={insets} router={router} />;
+        return <LoggedOutGate isDesktop={isDesktop} router={router} />;
     }
 
-    if (screen === 'report') {
-        return <ReportForm insets={insets} onBack={() => setScreen('home')} />;
-    }
-
-    // ← THIS WAS MISSING
-    return <HomeScreen insets={insets} onReportPress={() => setScreen('report')} router={router} />;
+    return <ReportForm isDesktop={isDesktop} onBack={() => router.back()} />;
 }
 
 // ── Logged-out gate ────────────────────────────────────────────────────────────
-function LoggedOutGate({ insets, router }: { insets: any; router: any }) {
+function LoggedOutGate({ isDesktop, router }: { isDesktop: boolean; router: any }) {
     return (
-        <View
-            className="flex-1 bg-[#F0F4F1] items-center justify-center px-8"
-            style={{ paddingBottom: insets.bottom }}
-        >
-            <View className="bg-white rounded-[24px] p-8 items-center shadow-sm w-full" style={{ elevation: 2 }}>
+        <View className="flex-1 bg-[#F0F4F1] items-center justify-center px-8">
+            <View
+                className="bg-white rounded-[24px] p-10 items-center shadow-sm"
+                style={{ width: isDesktop ? 420 : '100%', elevation: 2 }}
+            >
                 <View className="bg-[#E8F5E9] w-16 h-16 rounded-full items-center justify-center mb-5">
                     <UserLock size={30} color="#16A637" />
                 </View>
-                <Text className="text-[20px] font-extrabold text-[#233329] text-center mb-2">Login Required</Text>
-                <Text className="text-sm text-[#8F9BB3] text-center leading-5 mb-7">
+                <Text className="text-[22px] font-extrabold text-[#233329] text-center mb-2">Login Required</Text>
+                <Text className="text-sm text-[#8F9BB3] text-center leading-6 mb-8">
                     You need to be logged in to submit a garbage report.
                 </Text>
                 <TouchableOpacity
-                    className="bg-[#16A637] rounded-full h-[50px] w-full items-center justify-center mb-3"
+                    className="bg-[#16A637] rounded-full h-[50px] w-full items-center justify-center mb-4"
                     onPress={() => router.push('/login' as any)}
                 >
                     <Text className="text-white font-bold text-base">Login</Text>
@@ -100,216 +130,224 @@ function LoggedOutGate({ insets, router }: { insets: any; router: any }) {
     );
 }
 
-// ── Home screen ────────────────────────────────────────────────────────────────
-function HomeScreen({
-    insets,
-    onReportPress,
-    router,
-}: {
-    insets: any;
-    onReportPress: () => void;
-    router: any;
-}) {
-    const { language } = useAuth();
-    return (
-        <View className="flex-1 bg-[#F0F4F1]" style={{ paddingTop: insets.top }}>
-            {/* Report an Issue banner */}
-            <View className="px-5 pb-3">
-                <TouchableOpacity
-                    className="bg-[#E8F5E9] rounded-[16px] flex-row items-center p-4"
-                    style={{ gap: 14 }}
-                    onPress={onReportPress}
-                    activeOpacity={0.75}
-                >
-                    <View className="bg-[#16A637] w-[52px] h-[52px] rounded-[12px] items-center justify-center">
-                        <Plus size={28} color="#fff" strokeWidth={2.5}/>
-                    </View>
-                    <Text className="text-[17px] font-extrabold text-[#233329]">{t('report.headline1', language)}{' '}</Text>
-
-                </TouchableOpacity>
-            </View>
-
-            {/* Announcements */}
-            <ScrollView
-                className="flex-1 px-5"
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 32 }}
-            >
-                <View className="flex-row items-center justify-between mb-3">
-                    <Text className="text-[16px] font-extrabold text-[#233329]">{t('report.announcements', language)}{' '}</Text>
-                    <TouchableOpacity>
-                        <Text className="text-[13px] font-semibold text-[#16A637] underline">{t('report.view', language)}{' '}</Text>
-                    </TouchableOpacity>
-                </View>
-                {ANNOUNCEMENTS.map((ann) => (
-                    <AnnouncementCard key={ann.id} ann={ann} />
-                ))}
-            </ScrollView>
-        </View>
-    );
-}
-
-// ── Announcement card ──────────────────────────────────────────────────────────
-function AnnouncementCard({ ann }: { ann: (typeof ANNOUNCEMENTS)[0] }) {
-    const { language } = useAuth();
-    return (
-        <View className="bg-white rounded-[16px] p-4 mb-3 border border-[#E5E7EB]" style={{ elevation: 1 }}>
-            <Text className="text-[14px] font-extrabold text-[#16A637] mb-2">{ann.title}</Text>
-            <View className="flex-row mb-2" style={{ gap: 16 }}>
-                <View className="flex-row items-center" style={{ gap: 5 }}>
-                    <LocationIcon width={13} height={13} color="#8F9BB3" />
-                    <Text className="text-[11px] text-[#8F9BB3] font-semibold">{ann.district}</Text>
-                </View>
-                <View className="flex-row items-center" style={{ gap: 5 }}>
-                    <CalendarIcon width={13} height={13} color="#8F9BB3" />
-                    <Text className="text-[11px] text-[#8F9BB3] font-semibold">{ann.date}</Text>
-                </View>
-            </View>
-            <Text className="text-[11px] text-[#5a6a7a] leading-[17px] mb-3">{ann.body}</Text>
-            <TouchableOpacity
-                className="bg-[#16A637] rounded-full px-5 py-[7px] self-start"
-                activeOpacity={0.8}
-            >
-                <Text className="text-white text-[11px] font-bold">{t('report.read', language)}{' '}</Text>
-            </TouchableOpacity>
-        </View>
-    );
-}
-
 // ── Report form ────────────────────────────────────────────────────────────────
-function ReportForm({ insets, onBack }: { insets: any; onBack: () => void }) {
+function ReportForm({ isDesktop, onBack }: { isDesktop: boolean; onBack: () => void }) {
     const { language } = useAuth();
     const [location] = useState('Tupas Street, Matina Crossing, Davao City');
-    const [coordinates, setCoordinates] = useState<[number, number]>([125.601, 7.065]);
+    const [coordinates, setCoordinates] = useState<[number, number]>(DAVAO);
     const [issueType, setIssueType] = useState('');
     const [description, setDescription] = useState('');
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
 
     const handleSubmit = async () => {
-        if (!issueType) {
-            Alert.alert('Missing Field', 'Please select a type of report.');
-            return;
-        }
+        if (!issueType) return;
         setSubmitting(true);
         await new Promise((r) => setTimeout(r, 800));
         setSubmitting(false);
-        Alert.alert('Report Submitted', 'Thank you! Your report has been submitted.');
-        setIssueType('');
-        setDescription('');
+        // { issueType, description, coordinates, location }
+        setSubmitted(true);
+        setTimeout(() => {
+            setSubmitted(false);
+            setIssueType('');
+            setDescription('');
+        }, 3000);
     };
 
     return (
-        <View className="flex-1 bg-[#F8F9FA]" style={{ paddingTop: insets.top }}>
-            <ScrollView
-                className="flex-1 bg-[#F8F9FA]"
-                contentContainerStyle={{ paddingBottom: 120 }}
-                showsVerticalScrollIndicator={false}
-            >
-                <View className="px-5 pt-4 pb-5 bg-[#F8F9FA]">
-                    <BackButton />
-                    <Text className="text-[28px] font-extrabold text-[#233329]">{t('report.details', language)}{' '}</Text>
-                </View>
+        <ScrollView
+            className="flex-1 bg-[#F0F4F1]"
+            contentContainerStyle={{
+                paddingBottom: isDesktop ? 60 : 120,
+                paddingTop: isDesktop ? 40 : 0,
+                alignItems: isDesktop ? 'center' : undefined,
+            }}
+            showsVerticalScrollIndicator={false}
+        >
+            <View style={{ width: isDesktop ? 640 : '100%' }}>
 
-                <View className="flex-1 bg-[#F0F4F1] px-5 pt-6" style={{ minHeight: 500 }}>
-                    <Text className="text-[15px] font-extrabold text-[#233329] mb-3">{t('report.location', language)}{' '}</Text>
-                    <View style={{ height: 200, borderRadius: 16, overflow: 'hidden', marginBottom: 12 }}>
-                        <MapLibreMap
-                            style={{ flex: 1 }}
-                            mapStyle="https://tiles.openfreemap.org/styles/liberty"
-                            logo={false}
-                            attribution={false}
-                            onPress={(e: any) => {
-                                const coords = e?.geometry?.coordinates;
-                                if (coords) setCoordinates(coords as [number, number]);
-                            }}
+                {/* Mobile heading with back button */}
+                {!isDesktop && (
+                    <View className="flex-row items-center px-5 py-4 bg-[#F8F9FA]" style={{ gap: 12 }}>
+                        <TouchableOpacity
+                            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 16, alignSelf: 'flex-start' }}
+                            onPress={onBack}
                         >
-                            <Camera
-                                initialViewState={{
-                                    center: coordinates,
-                                    zoom: 15,
-                                }}
-                            />
-                            <GeoJSONSource
-                                id="pin-source"
-                                data={{ type: 'Feature', geometry: { type: 'Point', coordinates }, properties: {} }}
-                            >
-                                <Layer
-                                    id="pin-circle"
-                                    type="circle"
+                            <Text style={{ fontSize: 13, color: '#16A637', fontWeight: '700' }}>{t('report.return', language)}{' '}</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+
+                {!isDesktop && (
+                    <View className="px-6 pt-4 pb-2 bg-[#F8F9FA]">
+                        <Text className="text-[26px] font-extrabold text-[#233329]">Report Details</Text>
+                    </View>
+                )}
+
+                {/* Desktop: back link + heading */}
+                {isDesktop && (
+                    <View style={{ marginBottom: 24 }}>
+                        <TouchableOpacity
+                            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 16, alignSelf: 'flex-start' }}
+                            onPress={onBack}
+                        >
+                            <Text style={{ fontSize: 13, color: '#16A637', fontWeight: '700' }}>{t('report.return', language)}{' '}</Text>
+                        </TouchableOpacity>
+                        <Text className="text-[28px] font-extrabold text-[#233329]">{t('report.details', language)}{' '}</Text>
+                    </View>
+                )}
+
+                {/* Form card */}
+                <View
+                    className="bg-[#F0F4F1]"
+                    style={{
+                        overflow: 'visible',
+                        ...(isDesktop && {
+                            backgroundColor: '#fff',
+                            borderRadius: 24,
+                            padding: 40,
+                            shadowColor: '#000',
+                            shadowOpacity: 0.06,
+                            shadowRadius: 12,
+                            elevation: 2,
+                        }),
+                    }}
+                >
+                    {/* Success banner */}
+                    {submitted && (
+                        <View
+                            className="bg-[#E8F5E9] border border-[#16A637] rounded-[12px] px-4 py-3 mb-5 flex-row items-center"
+                            style={{ gap: 10 }}
+                        >
+                            <AlertTriangle size={18} color="#16A637" />
+                            <Text className="text-[#16A637] font-bold text-sm">{t('report.location', language)}{' '}</Text>
+                        </View>
+                    )}
+
+                    <View style={{ paddingHorizontal: isDesktop ? 0 : 20, overflow: 'visible' }}>
+                        {/* Location */}
+                        <Text className="text-[15px] font-extrabold text-[#233329] mb-3">{t('report.location', language)}{' '}</Text>
+                        <View style={{ height: 200, borderRadius: 16, overflow: 'hidden', marginBottom: 12 }}>
+                            <WebMap coordinates={coordinates} onCoordinatesChange={setCoordinates} />
+                        </View>
+                        <View className="bg-white border border-[#E5E7EB] rounded-[12px] px-4 h-[48px] justify-center mb-6">
+                            <Text className="text-[#233329] text-sm">{location}</Text>
+                        </View>
+
+                        {/* Type of Report */}
+                        <Text className="text-[15px] font-extrabold text-[#233329] mb-3">{t('report.type', language)}{' '}</Text>
+                        <View style={{ position: 'relative', zIndex: 10, overflow: 'visible', marginBottom: 24 }}>
+                            {dropdownOpen && (
+                                <View
                                     style={{
-                                        circleRadius: 10,
-                                        circleColor: '#16A637',
-                                        circleStrokeWidth: 3,
-                                        circleStrokeColor: '#ffffff',
+                                        position: 'absolute',
+                                        top: 52,
+                                        left: 0,
+                                        right: 0,
+                                        backgroundColor: '#fff',
+                                        borderWidth: 1,
+                                        borderColor: '#16A637',
+                                        borderTopLeftRadius: 0,
+                                        borderTopRightRadius: 0,
+                                        borderBottomLeftRadius: 12,
+                                        borderBottomRightRadius: 12,
+                                        borderTopWidth: 0,
+                                        overflow: 'hidden',
+                                        zIndex: 10,
+                                        shadowColor: '#000',
+                                        shadowOpacity: 0.08,
+                                        shadowRadius: 8,
+                                        elevation: 8,
                                     }}
-                                />
-                            </GeoJSONSource>
-                        </MapLibreMap>
-                    </View>
-
-                    <View className="bg-white border border-[#E5E7EB] rounded-[12px] px-4 h-[48px] justify-center mb-6">
-                        <Text className="text-[#233329] text-sm">{location}</Text>
-                    </View>
-
-                    <Text className="text-[15px] font-extrabold text-[#233329] mb-3">{t('report.type', language)}{' '}</Text>
-                    <TouchableOpacity
-                        className="bg-white border border-[#E5E7EB] rounded-[12px] px-4 h-[48px] flex-row items-center justify-between mb-6"
-                        onPress={() => setDropdownOpen(true)}
-                    >
-                        <Text className={issueType ? 'text-[#233329] text-sm' : 'text-[#8F9BB3] text-sm'}>
-                            {issueType || t('report.select', language)}
-                        </Text>
-                        <ChevronDown size={18} color="#8F9BB3" />
-                    </TouchableOpacity>
-
-                    <Text className="text-[15px] font-extrabold text-[#233329] mb-3">{t('report.description', language)}{' '}</Text>
-                    <TextInput
-                        className="bg-white border border-[#E5E7EB] rounded-[12px] px-4 pt-4 pb-4 text-sm text-[#233329] mb-6"
-                        placeholder={t('report.describe', language)}
-                        placeholderTextColor="#8F9BB3"
-                        multiline
-                        numberOfLines={6}
-                        style={{ height: 160, textAlignVertical: 'top' }}
-                        value={description}
-                        onChangeText={setDescription}
-                    />
-
-                    <Text className="text-[11px] text-[#8F9BB3] leading-[18px] mb-5">
-                        {t('report.note', language)}{' '}
-                    </Text>
-
-                    <TouchableOpacity
-                        className="bg-[#16A637] rounded-[14px] h-[56px] items-center justify-center"
-                        onPress={handleSubmit}
-                        disabled={submitting}
-                        style={{ opacity: submitting ? 0.7 : 1 }}
-                    >
-                        <Text style={{ fontSize: 15, color: '#fff', letterSpacing: 1.5, fontWeight: '800' }}>
-                            {submitting ? t('report.submitting', language) : t('report.submit', language)}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
-
-            <Modal visible={dropdownOpen} transparent animationType="fade" onRequestClose={() => setDropdownOpen(false)}>
-                <Pressable className="flex-1 bg-black/40" onPress={() => setDropdownOpen(false)}>
-                    <View className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[24px] px-5 pt-4 pb-8">
-                        <Text className="text-[16px] font-extrabold text-[#233329] mb-4">{t('report.type', language)}{' '}</Text>
-                        {ISSUE_TYPES.map((type) => (
+                                >
+                                    {ISSUE_TYPES.map((type, i) => (
+                                        <TouchableOpacity
+                                            key={type}
+                                            style={{
+                                                paddingHorizontal: 16,
+                                                paddingVertical: 13,
+                                                borderBottomWidth: i < ISSUE_TYPES.length - 1 ? 1 : 0,
+                                                borderBottomColor: '#F0F4F1',
+                                                backgroundColor: issueType === type ? '#F0FBF3' : '#fff',
+                                            }}
+                                            onPress={() => { setIssueType(type); setDropdownOpen(false); }}
+                                        >
+                                            <Text style={{
+                                                fontSize: 14,
+                                                color: issueType === type ? '#16A637' : '#233329',
+                                                fontWeight: issueType === type ? '700' : '400',
+                                            }}>
+                                                {type}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            )}
                             <TouchableOpacity
-                                key={type}
-                                className="py-4 border-b border-[#F0F4F1]"
-                                onPress={() => { setIssueType(type); setDropdownOpen(false); }}
+                                style={{
+                                    backgroundColor: '#fff',
+                                    borderWidth: 1,
+                                    borderColor: dropdownOpen ? '#16A637' : '#E5E7EB',
+                                    borderTopLeftRadius: 12,
+                                    borderTopRightRadius: 12,
+                                    borderBottomLeftRadius: dropdownOpen ? 0 : 12,
+                                    borderBottomRightRadius: dropdownOpen ? 0 : 12,
+                                    paddingHorizontal: 16,
+                                    height: 48,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                }}
+                                onPress={() => setDropdownOpen(!dropdownOpen)}
                             >
-                                <Text className={`text-sm ${issueType === type ? 'text-[#16A637] font-bold' : 'text-[#233329]'}`}>
-                                    {type}
+                                <Text style={{ fontSize: 14, color: issueType ? '#233329' : '#8F9BB3' }}>
+                                    {issueType || t('report.select', language)}
                                 </Text>
+                                <ChevronDown
+                                    size={18}
+                                    color="#8F9BB3"
+                                    style={{ transform: [{ rotate: dropdownOpen ? '180deg' : '0deg' }] }}
+                                />
                             </TouchableOpacity>
-                        ))}
+                        </View>
+
+                        {/* Description */}
+                        <Text className="text-[15px] font-extrabold text-[#233329] mb-3">{t('report.description', language)}{' '}</Text>
+                        <TextInput
+                            className="bg-white border border-[#E5E7EB] rounded-[12px] px-4 pt-4 text-sm text-[#233329] mb-6"
+                            placeholder={t('report.describe', language)}
+                            placeholderTextColor="#8F9BB3"
+                            multiline
+                            style={{ height: 160, textAlignVertical: 'top' } as any}
+                            value={description}
+                            onChangeText={setDescription}
+                        />
+
+                        {/* Consent */}
+                        <Text className="text-[11px] text-[#8F9BB3] leading-[18px] mb-6">
+                            {t('report.note', language)}{' '}
+                        </Text>
+
+                        {/* Submit */}
+                        <TouchableOpacity
+                            className="bg-[#16A637] rounded-[14px] h-[56px] items-center justify-center"
+                            onPress={handleSubmit}
+                            disabled={submitting || !issueType}
+                            style={{ opacity: submitting || !issueType ? 0.65 : 1 }}
+                        >
+                            <Text style={{
+                                fontSize: 15,
+                                color: '#fff',
+                                letterSpacing: 1.5,
+                                fontWeight: '800',
+                            }}>
+                                {submitting ? t('report.submitting', language) : t('report.submit', language)}
+                            </Text>
+                        </TouchableOpacity>
                     </View>
-                </Pressable>
-            </Modal>
-        </View>
+                </View>
+            </View>
+        </ScrollView>
     );
 }

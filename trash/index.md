@@ -1,9 +1,80 @@
+import CalendarIcon from '@/assets/icons/calendar.svg';
+import LocationIcon from '@/assets/icons/location.svg';
 import { useAuth } from '@/components/AuthContext';
 import { AuthColors } from '@/constants/auth-colors';
 import { t } from '@/constants/translations';
 import { useRouter } from 'expo-router';
 import { CalendarDays, Clock, Map as MapIcon, Search, Truck } from 'lucide-react-native';
 import { ScrollView, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+
+const ANNOUNCEMENTS = [
+    {
+        id: '1',
+        title: 'Littering in Water Bodies',
+        district: 'Talomo',
+        date: '06/24/2026',
+        body: 'Cleanup Drive on June 26, 2024. Located at MacArthur Highway, Kissea Village, Ulas, Talomo Proper, Talomo District, Davao City, Davao Region, 8023, Philippines',
+    },
+    {
+        id: '2',
+        title: 'Littering in Water Bodies',
+        district: 'Talomo',
+        date: '06/24/2026',
+        body: 'Cleanup Drive on June 26, 2024. Located at MacArthur Highway, Kissea Village, Ulas, Talomo Proper, Talomo District, Davao City, Davao Region, 8023, Philippines',
+    },
+];
+
+function AnnouncementCard({
+    ann,
+    isDesktop,
+}: {
+    ann: (typeof ANNOUNCEMENTS)[0];
+    isDesktop: boolean;
+}) {
+    const { language } = useAuth();
+    return (
+        <View
+            style={{
+                backgroundColor: '#fff',
+                borderRadius: 16,
+                padding: isDesktop ? 20 : 14,
+                marginBottom: isDesktop ? 12 : 12,
+                borderWidth: 1,
+                borderColor: '#E5E7EB',
+                elevation: 1,
+            }}
+        >
+            <Text style={{ fontSize: 14, fontWeight: '800', color: '#16A637', marginBottom: 8 }}>
+                {ann.title}
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 16, marginBottom: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                    <LocationIcon width={13} height={13} color="#8F9BB3" />
+                    <Text style={{ fontSize: 11, color: '#8F9BB3', fontWeight: '600' }}>{ann.district}</Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                    <CalendarIcon width={13} height={13} color="#8F9BB3" />
+                    <Text style={{ fontSize: 11, color: '#8F9BB3', fontWeight: '600' }}>{ann.date}</Text>
+                </View>
+            </View>
+            <Text style={{ fontSize: 11, color: '#5a6a7a', lineHeight: 17, marginBottom: 12 }}>
+                {ann.body}
+            </Text>
+            <TouchableOpacity
+                style={{
+                    backgroundColor: '#16A637',
+                    borderRadius: 20,
+                    paddingHorizontal: 18,
+                    paddingVertical: 7,
+                    alignSelf: 'flex-start',
+                }}
+                activeOpacity={0.8}
+            >
+                <Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>{t('report.read', language)}{' '}</Text>
+            </TouchableOpacity>
+        </View>
+    );
+}
 
 const DESKTOP_BREAKPOINT = 768;
 
@@ -97,7 +168,13 @@ export default function HomeScreen() {
     return (
         <>
             {isDesktop ? (
-                <View className="flex-1 items-center justify-center bg-[#F0F4F1]">
+                // ── Desktop: scrollable column centred at 460 px ──────────────
+                <ScrollView
+                    className="flex-1 bg-[#F0F4F1]"
+                    contentContainerStyle={{ alignItems: 'center', paddingVertical: 40, paddingBottom: 60 }}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* Main tracking card */}
                     <View
                         className="bg-white rounded-[28px] shadow-sm"
                         style={{ width: 460, paddingHorizontal: 40, paddingVertical: 28, elevation: 2 }}
@@ -155,7 +232,24 @@ export default function HomeScreen() {
                             </View>
                         </View>
                     </View>
-                </View>
+
+                    {/* ── Announcements (desktop) ──────────────────────────── */}
+                    <View style={{ width: 460, marginTop: 24 }}>
+                        <View className="flex-row items-center justify-between mb-3">
+                            <Text style={{ fontSize: 16, fontWeight: '800', color: '#233329' }}>
+                                {t('report.announcements', language)}{' '}
+                            </Text>
+                            <TouchableOpacity>
+                                <Text style={{ fontSize: 13, fontWeight: '600', color: '#16A637', textDecorationLine: 'underline' }}>
+                                    {t('report.view', language)}{' '}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                        {ANNOUNCEMENTS.map((ann) => (
+                            <AnnouncementCard key={ann.id} ann={ann} isDesktop={true} />
+                        ))}
+                    </View>
+                </ScrollView>
             ) : (
                 <ScrollView
                     className="flex-1 bg-[#F0F4F1]"
@@ -209,6 +303,23 @@ export default function HomeScreen() {
                                 <Text className="text-[#233329] font-medium text-base">{t('home.track.heatmap', language)}</Text>
                             </View>
                         </View>
+                    </View>
+
+                    {/* ── Announcements ─────────────────────────────────────── */}
+                    <View className="mt-6">
+                        <View className="flex-row items-center justify-between mb-3">
+                            <Text style={{ fontSize: 16, fontWeight: '800', color: '#233329' }}>
+                                {t('report.announcements', language)}{' '}
+                            </Text>
+                            <TouchableOpacity>
+                                <Text style={{ fontSize: 13, fontWeight: '600', color: '#16A637', textDecorationLine: 'underline' }}>
+                                    {t('report.view', language)}{' '}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                        {ANNOUNCEMENTS.map((ann) => (
+                            <AnnouncementCard key={ann.id} ann={ann} isDesktop={false} />
+                        ))}
                     </View>
                 </ScrollView>
             )}

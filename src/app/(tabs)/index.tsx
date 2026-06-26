@@ -1,9 +1,54 @@
+import CalendarIcon from '@/assets/icons/calendar.svg';
+import LocationIcon from '@/assets/icons/location.svg';
 import { useAuth } from '@/components/AuthContext';
 import { AuthColors } from '@/constants/auth-colors';
 import { t } from '@/constants/translations';
 import { useRouter } from 'expo-router';
 import { CalendarDays, Clock, Map as MapIcon, Search, Truck } from 'lucide-react-native';
 import { ScrollView, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+
+const ANNOUNCEMENTS = [
+    {
+        id: '1',
+        title: 'Littering in Water Bodies',
+        district: 'Talomo',
+        date: '06/24/2026',
+        body: 'Cleanup Drive on June 26, 2024. Located at MacArthur Highway, Kissea Village, Ulas, Talomo Proper, Talomo District, Davao City, Davao Region, 8023, Philippines',
+    },
+    {
+        id: '2',
+        title: 'Littering in Water Bodies',
+        district: 'Talomo',
+        date: '06/24/2026',
+        body: 'Cleanup Drive on June 26, 2024. Located at MacArthur Highway, Kissea Village, Ulas, Talomo Proper, Talomo District, Davao City, Davao Region, 8023, Philippines',
+    },
+];
+
+function AnnouncementCard({ ann }: { ann: (typeof ANNOUNCEMENTS)[0] }) {
+    const { language } = useAuth();
+    return (
+        <View className="bg-white rounded-[16px] p-4 mb-3 border border-[#E5E7EB]" style={{ elevation: 1 }}>
+            <Text className="text-[14px] font-extrabold text-[#16A637] mb-2">{ann.title}</Text>
+            <View className="flex-row mb-2" style={{ gap: 16 }}>
+                <View className="flex-row items-center" style={{ gap: 5 }}>
+                    <LocationIcon width={13} height={13} color="#8F9BB3" />
+                    <Text className="text-[11px] text-[#8F9BB3] font-semibold">{ann.district}</Text>
+                </View>
+                <View className="flex-row items-center" style={{ gap: 5 }}>
+                    <CalendarIcon width={13} height={13} color="#8F9BB3" />
+                    <Text className="text-[11px] text-[#8F9BB3] font-semibold">{ann.date}</Text>
+                </View>
+            </View>
+            <Text className="text-[11px] text-[#5a6a7a] leading-[17px] mb-3">{ann.body}</Text>
+            <TouchableOpacity
+                className="bg-[#16A637] rounded-full px-5 py-[7px] self-start"
+                activeOpacity={0.8}
+            >
+                <Text className="text-white text-[11px] font-bold">{t('report.read', language)}{' '}</Text>
+            </TouchableOpacity>
+        </View>
+    );
+}
 
 const DESKTOP_BREAKPOINT = 768;
 
@@ -209,6 +254,19 @@ export default function HomeScreen() {
                                 <Text className="text-[#233329] font-medium text-base">{t('home.track.heatmap', language)}</Text>
                             </View>
                         </View>
+                    </View>
+
+                    {/* ── Announcements ─────────────────────────────────────── */}
+                    <View className="mt-6">
+                        <View className="flex-row items-center justify-between mb-3">
+                            <Text className="text-[16px] font-extrabold text-[#233329]">{t('report.announcements', language)}{' '}</Text>
+                            <TouchableOpacity>
+                                <Text className="text-[13px] font-semibold text-[#16A637] underline">{t('report.view', language)}{' '}</Text>
+                            </TouchableOpacity>
+                        </View>
+                        {ANNOUNCEMENTS.map((ann) => (
+                            <AnnouncementCard key={ann.id} ann={ann} />
+                        ))}
                     </View>
                 </ScrollView>
             )}

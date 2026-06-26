@@ -2,7 +2,7 @@ import { t } from '@/constants/translations';
 import { router } from 'expo-router';
 import { LogOut } from 'lucide-react-native';
 import { useState } from 'react';
-import { FlatList, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Modal, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import LanguageIcon from '@/assets/icons/language.svg';
@@ -29,9 +29,10 @@ function GuestView() {
                 Sign in to access your profile, report waste, and track collection schedules
             </Text>
 
+            {/* Web/desktop: narrower buttons (w-1/2); native: full-width */}
             <TouchableOpacity
                 onPress={() => router.push('/login')}
-                className="w-full h-13 rounded-full items-center justify-center mb-3"
+                className={`${Platform.OS === 'web' ? 'w-1/2' : 'w-full'} h-13 rounded-full items-center justify-center mb-3`}
                 style={{ backgroundColor: AuthColors.green }}
                 activeOpacity={0.85}
             >
@@ -42,7 +43,7 @@ function GuestView() {
 
             <TouchableOpacity
                 onPress={() => router.push('/signup')}
-                className="w-full h-13 rounded-full items-center justify-center border-[1.5px]"
+                className={`${Platform.OS === 'web' ? 'w-1/2' : 'w-full'} h-13 rounded-full items-center justify-center border-[1.5px]`}
                 style={{ borderColor: AuthColors.green }}
                 activeOpacity={0.75}
             >
@@ -57,12 +58,61 @@ function GuestView() {
     );
 }
 
-// ─── Barangay Dropdown (native bottom-sheet) ──────────────────────────────────
+// ─── Barangay Dropdown ────────────────────────────────────────────────────────
+// Web: native <select> element with a custom caret overlay.
+// Native: Modal bottom-sheet with a FlatList.
 
 function BarangayDropdown() {
+    const { language } = useAuth();
+
+    if (Platform.OS === 'web') {
+        const [selected, setSelected] = useState<string>('');
+
+        return (
+            <View className="flex-1">
+                {/* @ts-ignore – select is valid HTML on web */}
+                <select
+                    value={selected}
+                    onChange={(e: any) => setSelected(e.target.value)}
+                    style={{
+                        width: '100%',
+                        height: 44,
+                        border: 'none',
+                        background: 'transparent',
+                        fontSize: 14,
+                        color: selected ? AuthColors.dark : AuthColors.placeholder,
+                        outline: 'none',
+                        cursor: 'pointer',
+                        appearance: 'none',
+                        WebkitAppearance: 'none',
+                        paddingRight: 28,
+                    }}
+                >
+                    <option value="" disabled>{t('profile.select', language)}{' '}</option>
+                    {BARANGAY_OPTIONS.map((b) => (
+                        <option key={b} value={b}>{b}</option>
+                    ))}
+                </select>
+                {/* Custom caret */}
+                <View
+                    style={{
+                        position: 'absolute',
+                        right: 4,
+                        top: '50%',
+                        transform: [{ translateY: -6 }],
+                        pointerEvents: 'none',
+                    }}
+                >
+                    <Text className="text-xs" style={{ color: AuthColors.placeholder }}>▾</Text>
+                </View>
+            </View>
+        );
+    }
+
+    // Native bottom-sheet
     const [selected, setSelected] = useState<string | null>(null);
     const [open, setOpen] = useState(false);
-    const { language } = useAuth();
+
     return (
         <>
             <TouchableOpacity
@@ -137,234 +187,273 @@ function BarangayDropdown() {
 
 function ProfileView({ user }: { user: User }) {
     const { logout, language, setLanguage } = useAuth();
+    const isWeb = Platform.OS === 'web';
 
     return (
         <ScrollView
             className="flex-1"
-            contentContainerClassName="px-6 pb-10"
+            // Web: vertical padding + narrower horizontal padding to let the max-width column breathe.
+            // Native: original horizontal padding with bottom clearance.
+            contentContainerClassName={isWeb ? 'py-8 px-4' : 'px-6 pb-10'}
             showsVerticalScrollIndicator={false}
         >
-            {/* ── Profile Card ── */}
-            <View className="bg-white rounded-3xl px-6 py-7 mb-6 shadow-sm" style={{ elevation: 2 }}>
-                {/* Avatar */}
-                <View className="items-center mb-3">
-                    <View
-                        className="w-20 h-20 rounded-full items-center justify-center mb-2.5"
-                        style={{ backgroundColor: AuthColors.greenLight }}
-                    >
-                        {/* Head */}
+            {/* Web: centred max-width column that mirrors the desktop mockup.
+                Native: no wrapper needed, content fills the screen naturally. */}
+            <View className={isWeb ? 'self-center w-full max-w-lg' : undefined}>
+
+                {/* ── Profile Card ── */}
+                <View
+                    className={`bg-white rounded-3xl mb-6 ${isWeb ? 'px-8 py-8' : 'px-6 py-7'}`}
+                    style={isWeb ? {
+                        shadowColor: '#000',
+                        shadowOpacity: 0.07,
+                        shadowRadius: 12,
+                        shadowOffset: { width: 0, height: 2 },
+                    } : {
+                        elevation: 2,
+                    }}
+                >
+                    {/* Avatar */}
+                    <View className={`items-center ${isWeb ? 'mb-4' : 'mb-3'}`}>
                         <View
-                            className="w-4 h-4 rounded-full border-[2.5px] mb-1"
-                            style={{ borderColor: AuthColors.green }}
-                        />
-                        {/* Shoulders */}
-                        <View
-                            className="w-7 h-3.5 border-[2.5px] border-b-0 rounded-tl-[14px] rounded-tr-[14px]"
-                            style={{ borderColor: AuthColors.green }}
-                        />
-                    </View>
-
-                    <Text
-                        className="font-extrabold text-lg text-center"
-                        style={{ color: AuthColors.dark }}
-                    >
-                        {user.fullName}
-                    </Text>
-                    <Text
-                        className="text-[13px] text-center mt-0.5"
-                        style={{ color: AuthColors.placeholder }}
-                    >
-                        {user.email}
-                    </Text>
-                </View>
-
-                {/* Divider */}
-                <View className="h-px bg-gray-100 my-4" />
-
-                {/* Stats */}
-                <View className="flex-row items-center justify-around">
-                    <TouchableOpacity
-                        className="flex-1 items-center"
-                        activeOpacity={0.7}
-                        onPress={() => router.push('/notifs?filter=all' as any)}
-                    >
-                        <Text
-                            className="text-[22px]"
-                            style={{ color: AuthColors.green }}
+                            className={`w-20 h-20 rounded-full items-center justify-center ${isWeb ? 'mb-3' : 'mb-2.5'}`}
+                            style={{ backgroundColor: AuthColors.greenLight }}
                         >
-                            5
-                        </Text>
-                        <Text
-                            className="text-xs"
-                            style={{ color: AuthColors.dark }}
-                        >
-                            {t('profile.reports', language)}{' '}
-                        </Text>
-                    </TouchableOpacity>
-
-                    <View className="w-px h-9 bg-gray-200" />
-
-                    <TouchableOpacity
-                        className="flex-1 items-center"
-                        activeOpacity={0.7}
-                        onPress={() => router.push('/notifs?filter=resolved' as any)}
-                    >
-                        <Text
-                            className="text-[22px]"
-                            style={{ color: AuthColors.green }}
-                        >
-                            3
-                        </Text>
-                        <Text
-                            className="text-xs"
-                            style={{ color: AuthColors.dark }}
-                        >
-                            {t('profile.resolved', language)}{' '}
-                        </Text>
-                    </TouchableOpacity>
-
-                    <View className="w-px h-9 bg-gray-200" />
-
-                    <TouchableOpacity
-                        className="flex-1 items-center"
-                        activeOpacity={0.7}
-                        onPress={() => router.push('/notifs?filter=pending' as any)}
-                    >
-                        <Text
-                            className="text-[22px]"
-                            style={{ color: AuthColors.green }}
-                        >
-                            2
-                        </Text>
-                        <Text
-                            className="text-xs"
-                            style={{ color: AuthColors.dark }}
-                        >
-                            {t('profile.pending', language)}{' '}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-
-            {/* ── BARANGAY ── */}
-            <Text
-                className="font-bold text-[16px] tracking-widest mb-2.5"
-                style={{ color: AuthColors.green }}
-            >
-                BARANGAY
-            </Text>
-
-            <View
-                className="bg-white rounded-2xl px-4 py-3 flex-row items-center gap-3 mb-6"
-                style={{ elevation: 1 }}
-            >
-                <View
-                    className="w-12 h-12 rounded-[14px] items-center justify-center shrink-0"
-                    style={{ backgroundColor: AuthColors.dark }}
-                >
-                    <LocationIcon width={22} height={22} color="#fff" />
-                </View>
-
-                <View
-                    className="flex-1 h-11 border border-[#233329] rounded-full px-4 justify-center overflow-hidden bg-[#F0F4F1]"
-                >
-                    <BarangayDropdown />
-                </View>
-            </View>
-
-            {/* ── LANGUAGE ── */}
-            <Text
-                className="font-bold text-[16px] tracking-widest mb-2.5"
-                style={{ color: AuthColors.green }}
-            >
-                {t('profile.language', language)}{' '}
-            </Text>
-
-            <View
-                className="bg-white rounded-2xl px-4 py-3 flex-row items-center gap-4 mb-8"
-                style={{ elevation: 1 }}
-            >
-                <View
-                    className="w-12 h-12 rounded-[14px] items-center justify-center shrink-0"
-                    style={{ backgroundColor: AuthColors.dark }}
-                >
-                    <LanguageIcon width={22} height={22} color="#fff" />
-                </View>
-
-                {/* English */}
-                <TouchableOpacity
-                    onPress={() => setLanguage('english')}
-                    className="flex-row items-center gap-2"
-                    activeOpacity={0.7}
-                >
-                    <View
-                        className="w-[22px] h-[22px] rounded-full border-2 items-center justify-center"
-                        style={{
-                            borderColor: language === 'english' ? AuthColors.green : '#C0C0C0',
-                        }}
-                    >
-                        {language === 'english' && (
+                            {/* Head */}
                             <View
-                                className="w-[11px] h-[11px] rounded-full"
-                                style={{ backgroundColor: AuthColors.green }}
+                                className="w-4 h-4 rounded-full border-[2.5px] mb-1"
+                                style={{ borderColor: AuthColors.green }}
                             />
-                        )}
-                    </View>
-                    <Text
-                        className="text-[15px]"
-                        style={{
-                            color: language === 'english' ? AuthColors.green : AuthColors.dark,
-                        }}
-                    >
-                        English
-                    </Text>
-                </TouchableOpacity>
-
-                {/* Bisaya */}
-                <TouchableOpacity
-                    onPress={() => setLanguage('bisaya')}
-                    className="flex-row items-center gap-2"
-                    activeOpacity={0.7}
-                >
-                    <View
-                        className="w-[22px] h-[22px] rounded-full border-2 items-center justify-center"
-                        style={{
-                            borderColor: language === 'bisaya' ? AuthColors.green : '#C0C0C0',
-                        }}
-                    >
-                        {language === 'bisaya' && (
+                            {/* Shoulders */}
                             <View
-                                className="w-[11px] h-[11px] rounded-full"
-                                style={{ backgroundColor: AuthColors.green }}
+                                className="w-7 h-3.5 border-[2.5px] border-b-0 rounded-tl-[14px] rounded-tr-[14px]"
+                                style={{ borderColor: AuthColors.green }}
                             />
-                        )}
-                    </View>
-                    <Text
-                        className="text-[15px]"
-                        style={{
-                            color: language === 'bisaya' ? AuthColors.green : AuthColors.dark,
-                        }}
-                    >
-                        Bisaya
-                    </Text>
-                </TouchableOpacity>
-            </View>
+                        </View>
 
-            {/* ── Log Out ── */}
-            <TouchableOpacity
-                onPress={logout}
-                className="w-1/2 self-center flex-row items-center justify-center gap-2 border-[1.5px] rounded-full h-13"
-                style={{ borderColor: AuthColors.errorText, backgroundColor: '#FFF5F5' }}
-                activeOpacity={0.75}
-            >
-                <LogOut size={20} color={AuthColors.errorText} />
+                        {/* Web: slightly larger name; native: original size */}
+                        <Text
+                            className={`font-extrabold text-center ${isWeb ? 'text-xl' : 'text-lg'}`}
+                            style={{ color: AuthColors.dark }}
+                        >
+                            {user.fullName}
+                        </Text>
+                        <Text
+                            className={`text-[13px] text-center ${isWeb ? 'text-sm mt-1' : 'mt-0.5'}`}
+                            style={{ color: AuthColors.placeholder }}
+                        >
+                            {user.email}
+                        </Text>
+                    </View>
+
+                    {/* Divider */}
+                    <View className="h-px bg-gray-100 my-4" />
+
+                    {/* Stats */}
+                    <View className="flex-row items-center justify-around">
+                        <TouchableOpacity
+                            className="flex-1 items-center"
+                            activeOpacity={0.7}
+                            onPress={() => router.push('/notifs?filter=all' as any)}
+                        >
+                            <Text
+                                className="text-[22px]"
+                                style={{ color: AuthColors.green }}
+                            >
+                                5
+                            </Text>
+                            <Text
+                                className={`text-xs ${isWeb ? 'mt-0.5' : ''}`}
+                                style={{ color: AuthColors.dark }}
+                            >
+                                {t('profile.reports', language)}{' '}
+                            </Text>
+                        </TouchableOpacity>
+
+                        <View className="w-px h-9 bg-gray-200" />
+
+                        <TouchableOpacity
+                            className="flex-1 items-center"
+                            activeOpacity={0.7}
+                            onPress={() => router.push('/notifs?filter=resolved' as any)}
+                        >
+                            <Text
+                                className="text-[22px]"
+                                style={{ color: AuthColors.green }}
+                            >
+                                3
+                            </Text>
+                            <Text
+                                className={`text-xs ${isWeb ? 'mt-0.5' : ''}`}
+                                style={{ color: AuthColors.dark }}
+                            >
+                                {t('profile.resolved', language)}{' '}
+                            </Text>
+                        </TouchableOpacity>
+
+                        <View className="w-px h-9 bg-gray-200" />
+
+                        <TouchableOpacity
+                            className="flex-1 items-center"
+                            activeOpacity={0.7}
+                            onPress={() => router.push('/notifs?filter=pending' as any)}
+                        >
+                            <Text
+                                className="text-[22px]"
+                                style={{ color: AuthColors.green }}
+                            >
+                                2
+                            </Text>
+                            <Text
+                                className={`text-xs ${isWeb ? 'mt-0.5' : ''}`}
+                                style={{ color: AuthColors.dark }}
+                            >
+                                {t('profile.pending', language)}{' '}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {/* ── BARANGAY ── */}
                 <Text
-                    className="text-base"
-                    style={{ color: AuthColors.errorText }}
+                    className="font-bold text-[16px] tracking-widest mb-2.5"
+                    style={{ color: AuthColors.green }}
                 >
-                    Log Out
+                    BARANGAY
                 </Text>
-            </TouchableOpacity>
+
+                <View
+                    className="bg-white rounded-2xl px-4 py-3 flex-row items-center gap-3 mb-6"
+                    style={isWeb ? {
+                        shadowColor: '#000',
+                        shadowOpacity: 0.04,
+                        shadowRadius: 8,
+                        shadowOffset: { width: 0, height: 1 },
+                    } : {
+                        elevation: 1,
+                    }}
+                >
+                    <View
+                        className="w-12 h-12 rounded-[14px] items-center justify-center shrink-0"
+                        style={{ backgroundColor: AuthColors.dark }}
+                    >
+                        <LocationIcon width={22} height={22} color="#fff" />
+                    </View>
+
+                    {/* Web needs position:relative so the absolute caret inside BarangayDropdown is anchored correctly */}
+                    <View
+                        className="flex-1 h-11 border border-[#233329] rounded-full px-4 justify-center overflow-hidden bg-[#F0F4F1]"
+                        style={isWeb ? { position: 'relative' } : undefined}
+                    >
+                        <BarangayDropdown />
+                    </View>
+                </View>
+
+                {/* ── LANGUAGE ── */}
+                <Text
+                    className="font-bold text-[16px] tracking-widest mb-2.5"
+                    style={{ color: AuthColors.green }}
+                >
+                    {t('profile.language', language)}{' '}
+                </Text>
+
+                <View
+                    className="bg-white rounded-2xl px-4 py-3 flex-row items-center gap-4 mb-8"
+                    style={isWeb ? {
+                        shadowColor: '#000',
+                        shadowOpacity: 0.04,
+                        shadowRadius: 8,
+                        shadowOffset: { width: 0, height: 1 },
+                    } : {
+                        elevation: 1,
+                    }}
+                >
+                    <View
+                        className="w-12 h-12 rounded-[14px] items-center justify-center shrink-0"
+                        style={{ backgroundColor: AuthColors.dark }}
+                    >
+                        <LanguageIcon width={22} height={22} color="#fff" />
+                    </View>
+
+                    {/* Web: centred row with more breathing room between options */}
+                    <View className={isWeb ? 'flex-1 flex-row items-center justify-center gap-8' : 'flex-row items-center gap-2'}>
+                        {/* English */}
+                        <TouchableOpacity
+                            onPress={() => setLanguage('english')}
+                            className="flex-row items-center gap-2"
+                            activeOpacity={0.7}
+                        >
+                            <View
+                                className="w-[22px] h-[22px] rounded-full border-2 items-center justify-center"
+                                style={{
+                                    borderColor: language === 'english' ? AuthColors.green : '#C0C0C0',
+                                }}
+                            >
+                                {language === 'english' && (
+                                    <View
+                                        className="w-[11px] h-[11px] rounded-full"
+                                        style={{ backgroundColor: AuthColors.green }}
+                                    />
+                                )}
+                            </View>
+                            <Text
+                                className="text-[15px]"
+                                style={{
+                                    color: language === 'english' ? AuthColors.green : AuthColors.dark,
+                                }}
+                            >
+                                English
+                            </Text>
+                        </TouchableOpacity>
+
+                        {/* Bisaya */}
+                        <TouchableOpacity
+                            onPress={() => setLanguage('bisaya')}
+                            className="flex-row items-center gap-2"
+                            activeOpacity={0.7}
+                        >
+                            <View
+                                className="w-[22px] h-[22px] rounded-full border-2 items-center justify-center"
+                                style={{
+                                    borderColor: language === 'bisaya' ? AuthColors.green : '#C0C0C0',
+                                }}
+                            >
+                                {language === 'bisaya' && (
+                                    <View
+                                        className="w-[11px] h-[11px] rounded-full"
+                                        style={{ backgroundColor: AuthColors.green }}
+                                    />
+                                )}
+                            </View>
+                            <Text
+                                className="text-[15px]"
+                                style={{
+                                    color: language === 'bisaya' ? AuthColors.green : AuthColors.dark,
+                                }}
+                            >
+                                Bisaya
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {/* ── Log Out ── */}
+                <TouchableOpacity
+                    onPress={logout}
+                    className="w-1/2 self-center flex-row items-center justify-center gap-2 border-[1.5px] rounded-full h-13"
+                    style={{ borderColor: AuthColors.errorText, backgroundColor: '#FFF5F5' }}
+                    activeOpacity={0.75}
+                >
+                    <LogOut size={20} color={AuthColors.errorText} />
+                    <Text
+                        className="text-base"
+                        style={{ color: AuthColors.errorText }}
+                    >
+                        Log Out
+                    </Text>
+                </TouchableOpacity>
+
+            </View>
         </ScrollView>
     );
 }
