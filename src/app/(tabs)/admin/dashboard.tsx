@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 export default function AdminDashboard() {
+    const [summaryData, setSummaryData] = useState([]);
+    const [summaryError, setSummaryError] = useState<string | null>(null);
     const [reportData, setReportData] = useState([]);
     const [reportError, setReportError] = useState<string | null>(null);
     const [themesData, setThemesData] = useState([]);
@@ -31,11 +33,19 @@ export default function AdminDashboard() {
             } catch (err) {
                 setReportError(err instanceof Error ? err.message : "Something went wrong");
             }
+
+            try {
+                const res = await fetch("http://localhost:8000/api/reports/general/summary");
+                if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
+                const data = await res.json();
+                setSummaryData(data);
+            } catch (err) {
+                setSummaryError(err instanceof Error ? err.message : "Something went wrong");
+            }
         };
 
         fetchData();
     }, []);
-
 
     return (
         <View className="flex-row h-full">
@@ -57,9 +67,10 @@ export default function AdminDashboard() {
                             </View>
 
                             <View className="px-5 py-4">
-                                <Text className="font-normal">
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ac arcu  ligula. In vestibulum vel augue vel convallis.  Aenean ut nisl lobortis,  convallis leo eu, luctus diam. Aenean vel faucibus quam. Sed imperdiet vitae dolor vel eleifend.
-                                </Text>
+                                {summaryData && (<Text className="font-normal">Failed to fetch summary</Text>)}
+                                {!summaryData && (<Text className="font-normal">
+                                    {summaryData}
+                                </Text>)}
                             </View>
                         </View>
                     </View>
