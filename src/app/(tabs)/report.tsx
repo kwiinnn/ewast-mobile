@@ -18,7 +18,7 @@ import {
 } from 'react-native';
 
 
-const API_BASE = 'https://b62sfaavmpliusmek4jx3g7imu0iurxr.lambda-url.ap-southeast-1.on.aws/api';
+const API_BASE = 'https://b62sfaavmpliusmek5jx3q7imu0lurxr.lambda-url.ap-southeast-1.on.aws/api';
 
 // Values must exactly match the backend ReportType enum
 const ISSUE_TYPES = [
