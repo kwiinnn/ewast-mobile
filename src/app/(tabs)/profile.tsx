@@ -189,6 +189,13 @@ function ProfileView({ user }: { user: User }) {
     const { logout, language, setLanguage } = useAuth();
     const isWeb = Platform.OS === 'web';
 
+    // Combine firstname + lastname from the backend; fall back to the
+    // email local-part if neither is available (e.g. right after login
+    // before the login screen passes the name fields).
+    const displayName =
+        [user.firstname, user.lastname].filter(Boolean).join(' ') ||
+        (user.email ? user.email.split('@')[0] : 'User');
+
     return (
         <ScrollView
             className="flex-1"
@@ -236,13 +243,13 @@ function ProfileView({ user }: { user: User }) {
                             className={`font-extrabold text-center ${isWeb ? 'text-xl' : 'text-lg'}`}
                             style={{ color: AuthColors.dark }}
                         >
-                            {user.fullName}
+                            {displayName}
                         </Text>
                         <Text
                             className={`text-[13px] text-center ${isWeb ? 'text-sm mt-1' : 'mt-0.5'}`}
                             style={{ color: AuthColors.placeholder }}
                         >
-                            {user.email}
+                            {user.email ?? '—'}
                         </Text>
                     </View>
 

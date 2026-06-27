@@ -5,11 +5,13 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
 const TOKEN_KEY = 'ewast_access_token';
+const EMAIL_KEY = 'ewast_user_email';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type User = {
-  fullName: string;
+  firstname: string;
+  lastname: string;
   email: string;
 };
 
@@ -21,7 +23,7 @@ type AuthContextType = {
   user: User | null;
   token: string | null;
   /** Called by the login screen after a successful POST /api/users/login */
-  setToken: (accessToken: string, tokenType: string) => Promise<void>;
+  setToken: (accessToken: string, tokenType: string, email: string) => Promise<void>;
   signup: (data: {
     firstname: string;
     lastname: string;
@@ -47,6 +49,14 @@ interface SignupPayload {
 }
 
 interface SignupResponse {
+  user_id: number;
+  firstname: string;
+  lastname: string;
+  email: string;
+  role: string;
+}
+
+interface CitizenResponse {
   user_id: number;
   firstname: string;
   lastname: string;
@@ -90,28 +100,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguage] = useState<Language>('english');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Rehydrate token from storage on app launch
+  /**
+   * Fetches the citizen list and returns the entry matching the given email.
+   * Called after login and on app rehydration to populate the user profile.
+   */
+  const fetchUserProfile = async (accessToken: string, email: string): Promise<User | null> => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/users/citizens`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!res.ok) return null;
+      const citizens: CitizenResponse[] = await res.json();
+      const match = citizens.find((c) => c.email === email);
+      if (!match) return null;
+      return { firstname: match.firstname, lastname: match.lastname, email: match.email };
+    } catch {
+      return null;
+    }
+  };
+
+  // Rehydrate token + user profile from storage on app launch
   useEffect(() => {
-    AsyncStorage.getItem(TOKEN_KEY)
-      .then((stored: string | null) => {
-        if (stored) setTokenState(stored);
-      })
-      .finally(() => setIsLoading(false));
+    (async () => {
+      try {
+        const stored = await AsyncStorage.getItem(TOKEN_KEY);
+        if (!stored) return;
+        setTokenState(stored);
+        const storedEmail = await AsyncStorage.getItem(EMAIL_KEY);
+        if (storedEmail) {
+          const profile = await fetchUserProfile(stored, storedEmail);
+          if (profile) setUser(profile);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    })();
   }, []);
 
   /**
-   * Called by LoginScreenWeb after a successful POST /api/users/login.
-   * Persists the token to AsyncStorage and marks the user as logged in.
-   *
-   * Note: the login endpoint only returns a token, not user profile data.
-   * We store a minimal user object derived from the email for now; if you
-   * need the full profile, add a GET /api/users/me call here.
+   * Called by the login screen after a successful POST /api/users/login.
+   * Persists the token, then fetches the full profile from /api/users/citizens.
    */
-  const setToken = async (accessToken: string, _tokenType: string) => {
+  const setToken = async (accessToken: string, _tokenType: string, email: string) => {
     await AsyncStorage.setItem(TOKEN_KEY, accessToken);
+    await AsyncStorage.setItem(EMAIL_KEY, email);
     setTokenState(accessToken);
-    // Minimal user — replace with a /me fetch if the API supports it
-    setUser({ fullName: '', email: '' });
+    const profile = await fetchUserProfile(accessToken, email);
+    setUser(profile ?? { firstname: '', lastname: '', email });
   };
 
   /**
@@ -136,13 +171,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     // Signup does not return a token — the user must log in separately.
-    // We still populate the user state so the UI can show a success screen
-    // if needed, but isLoggedIn will remain false until setToken is called.
-    setUser({ fullName: `${result.firstname} ${result.lastname}`.trim(), email: result.email });
+    setUser({ firstname: result.firstname, lastname: result.lastname, email: result.email });
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem(TOKEN_KEY);
+    await AsyncStorage.multiRemove([TOKEN_KEY, EMAIL_KEY]);
     setTokenState(null);
     setUser(null);
   };

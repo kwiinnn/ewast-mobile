@@ -260,7 +260,7 @@ export default function LoginScreenWeb() {
 
             // Persist the token in your AuthContext so every subsequent
             // API call can attach:  Authorization: Bearer <access_token>
-            setToken(access_token, token_type);
+            await setToken(access_token, token_type, email.trim());
 
             router.replace('/');
         } catch {

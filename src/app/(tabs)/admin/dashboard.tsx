@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 export default function AdminDashboard() {
+    const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
     const [summaryData, setSummaryData] = useState([]);
     const [summaryError, setSummaryError] = useState<string | null>(null);
     const [reportData, setReportData] = useState([]);
@@ -17,7 +18,7 @@ export default function AdminDashboard() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetch("http://localhost:8000/api/reports/stats/report-themes");
+                const res = await fetch(`${BASE_URL}/api/reports/stats/report-themes`);
                 if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
                 const data = await res.json();
                 setThemesData(data);
@@ -26,7 +27,7 @@ export default function AdminDashboard() {
             }
 
             try {
-                const res = await fetch("http://localhost:8000/api/reports");
+                const res = await fetch(`${BASE_URL}/api/reports`);
                 if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
                 const data = await res.json();
                 setReportData(data);
@@ -35,7 +36,7 @@ export default function AdminDashboard() {
             }
 
             try {
-                const res = await fetch("http://localhost:8000/api/reports/general/summary");
+                const res = await fetch(`${BASE_URL}/api/reports/general/summary`);
                 if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
                 const data = await res.json();
                 setSummaryData(data);
@@ -80,19 +81,20 @@ export default function AdminDashboard() {
                         <MetricCard
                             className="flex-1"
                             heading="Most Frequently Reported"
-                            endpoint="http://localhost:3000/api/rankings"> 
-                            {/* test endpoint */}
-                        </MetricCard>
+                            endpoint={`${BASE_URL}/api/rankings`}
+                        />
+
                         <MetricCard
                             className="flex-1"
                             heading="Report Density"
-                            endpoint="http://localhost:3000/api/rankings">
-                        </MetricCard>
+                            endpoint={`${BASE_URL}/api/rankings`}
+                        />
+
                         <MetricCard
                             className="flex-1"
                             heading="Report Tally Per Type"
-                            endpoint="http://localhost:3000/api/rankings">
-                        </MetricCard>
+                            endpoint={`${BASE_URL}/api/rankings`}
+                        />
                     </View>
 
                     {/* Recent Reports */}
