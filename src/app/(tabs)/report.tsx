@@ -18,16 +18,19 @@ import {
 } from 'react-native';
 
 
+const API_BASE = 'http://localhost:8000/api';
+
+// Values must exactly match the backend ReportType enum
 const ISSUE_TYPES = [
-    'Drainage blockage',
-    'E-waste',
-    'Hazardous waste',
-    'Organic waste',
-    'Plastic waste',
-    'Bulky waste',
-    'Mixed waste',
-    'Overflowing bin/s',
-    'Illegal dumping',
+    'Drainage Blockage',
+    'E-Waste',
+    'Hazardous Waste',
+    'Organic Waste',
+    'Plastic Waste',
+    'Bulky Waste',
+    'Mixed Waste',
+    'Overflowing Bin/s',
+    'Illegal Dumping',
 ];
 
 const DESKTOP_BREAKPOINT = 768;
@@ -82,7 +85,7 @@ function LoggedOutGate({ isDesktop, router }: { isDesktop: boolean; router: any 
 
 // ── Report form ────────────────────────────────────────────────────────────────
 function ReportForm({ isDesktop, onBack }: { isDesktop: boolean; onBack: () => void }) {
-    const { language } = useAuth();
+    const { language, token } = useAuth();
     const [location, setLocation] = useState('Locating…');
     const [locationLoading, setLocationLoading] = useState(false);
     const [coordinates, setCoordinates] = useState<[number, number]>(DAVAO);
@@ -210,17 +213,65 @@ function ReportForm({ isDesktop, onBack }: { isDesktop: boolean; onBack: () => v
 
     const handleSubmit = async () => {
         if (!issueType) return;
+
+        // Guard: ensure coordinates are always finite numbers (never null/NaN)
+        const [lng, lat] = coordinates;
+        const safeLat = Number.isFinite(lat) ? lat : DAVAO[1];
+        const safeLng = Number.isFinite(lng) ? lng : DAVAO[0];
+
+        if (!photo) {
+            Alert.alert('Photo required', 'Please attach a photo before submitting.');
+            return;
+        }
+
         setSubmitting(true);
-        await new Promise((r) => setTimeout(r, 800));
-        setSubmitting(false);
-        // { issueType, description, coordinates, location }
-        setSubmitted(true);
-        setTimeout(() => {
-            setSubmitted(false);
-            setIssueType('');
-            setDescription('');
-            setPhoto(null);
-        }, 3000);
+        try {
+            const body = new FormData();
+            body.append('type', issueType);
+            if (description) body.append('notes', description);
+            body.append('latitude', String(safeLat));
+            body.append('longitude', String(safeLng));
+
+            // Attach image — on web photo is a data-URI, on native it is a file URI
+            if (Platform.OS === 'web') {
+                // Convert data-URI to a Blob for web FormData
+                const res = await fetch(photo);
+                const blob = await res.blob();
+                body.append('image', blob, 'photo.jpg');
+            } else {
+                const filename = photo.split('/').pop() ?? 'photo.jpg';
+                const ext = filename.split('.').pop()?.toLowerCase() ?? 'jpg';
+                const mimeType = ext === 'png' ? 'image/png' : 'image/jpeg';
+                body.append('image', { uri: photo, name: filename, type: mimeType } as any);
+            }
+
+            const response = await fetch(`${API_BASE}/reports/create`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    // Do NOT set Content-Type manually — the browser/RN sets it with the
+                    // correct multipart boundary when FormData is the body.
+                },
+                body,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData?.detail ?? `Server error ${response.status}`);
+            }
+
+            setSubmitted(true);
+            setTimeout(() => {
+                setSubmitted(false);
+                setIssueType('');
+                setDescription('');
+                setPhoto(null);
+            }, 3000);
+        } catch (err: any) {
+            Alert.alert('Submission failed', err?.message ?? 'An unexpected error occurred. Please try again.');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
