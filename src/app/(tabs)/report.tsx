@@ -4,7 +4,7 @@ import { t } from '@/constants/translations';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { AlertTriangle, Camera, ChevronDown, Image as ImageIcon, Upload, UserLock, X } from 'lucide-react-native';
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
     Alert,
     Image,
@@ -83,8 +83,35 @@ function LoggedOutGate({ isDesktop, router }: { isDesktop: boolean; router: any 
 // ── Report form ────────────────────────────────────────────────────────────────
 function ReportForm({ isDesktop, onBack }: { isDesktop: boolean; onBack: () => void }) {
     const { language } = useAuth();
-    const [location] = useState('Tupas Street, Matina Crossing, Davao City');
+    const [location, setLocation] = useState('Locating…');
+    const [locationLoading, setLocationLoading] = useState(false);
     const [coordinates, setCoordinates] = useState<[number, number]>(DAVAO);
+
+    // Reverse-geocode the pinned coordinates using Nominatim
+    const reverseGeocode = useCallback(async (coords: [number, number]) => {
+        const [lng, lat] = coords;
+        setLocationLoading(true);
+        try {
+            const res = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+                { headers: { 'Accept-Language': 'en' } }
+            );
+            if (!res.ok) throw new Error('Network response was not ok');
+            const data = await res.json();
+            if (data?.display_name) {
+                setLocation(data.display_name);
+            } else {
+                setLocation(`${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+            }
+        } catch {
+            setLocation(`${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+        } finally {
+            setLocationLoading(false);
+        }
+    }, []);
+
+    // Fetch address on mount and whenever the pin moves
+    useEffect(() => { reverseGeocode(coordinates); }, [coordinates, reverseGeocode]);
     const [issueType, setIssueType] = useState('');
     const [description, setDescription] = useState('');
     const [photo, setPhoto] = useState<string | null>(null);
@@ -273,7 +300,13 @@ function ReportForm({ isDesktop, onBack }: { isDesktop: boolean; onBack: () => v
                             <WebMap center={coordinates} zoom={15} onCoordinatesChange={setCoordinates} />
                         </View>
                         <View className="bg-white border border-[#E5E7EB] rounded-[12px] px-4 h-[48px] justify-center mb-6">
-                            <Text className="text-[#233329] text-sm">{location}</Text>
+                            <Text
+                                className="text-sm"
+                                style={{ color: locationLoading ? '#8F9BB3' : '#233329' }}
+                                numberOfLines={1}
+                            >
+                                {locationLoading ? 'Locating…' : location}
+                            </Text>
                         </View>
 
                         {/* Type of Report */}
